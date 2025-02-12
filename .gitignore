@@ -8,3 +8,6 @@ config/*.env
 # OS system files
 .DS_Store
 Thumbs.db
+
+#test files
+*.http
