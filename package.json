@@ -1,0 +1,30 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon app.js",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BoostTeam5/Backend.git"
+  },
+  "author": "Boost_Team5",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BoostTeam5/Backend/issues"
+  },
+  "homepage": "https://github.com/BoostTeam5/Backend#readme",
+  "description": "Boost Team 5의 백엔드 서버 프로젝트",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "type": "module"
+}
