@@ -5,175 +5,60 @@ import {
 } from "../utils/customError";
 import { comparePassword, hashPassword } from "../utils/passwordUtils";
 import { PrismaClient } from "@prisma/client";
+//배지, 태그관련 import 필요
 
 const prisma = new PrismaClient();
 
-exports.getPost = async (req, res, next) => {
-  const { groupId } = req.params;
-  const {
-    page = 1,
-    pageSize = 10,
-    sortBy = "latest",
-    keyword = "",
-    isPublic = true,
-  } = req.query;
-
+const getPostDetailsById = async (postId) => {
   try {
-    const group = await prisma.group.findUnique({ where: { id: groupId } }); // findUniqe -> prisma 메소드
-
-    if (!group) {
-      throw new BadRequestError();
-    }
-
-    // 페이지네이션 설정
-    const limit = parseInt(pageSize, 10);
-    const offset = (parseInt(page, 10) - 1) * limit;
-
-    const sortOptions = {
-      latest: { createdAt: "DESC" },
-      mostCommented: { commentCount: "DESC" },
-      mostLiked: { likeCount: "DESC" },
-    };
-
-    const posts = await prisma.post.findMany({
-      skip: offset,
-      take: limit,
-      orderBy: sortOptions[sortBy],
-      where: {
-        OR: [
-          { title: { contains: keyword } },
-          {
-            PostTags: {
-              some: {
-                Tag: {
-                  name: { contains: keyword },
-                },
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: {
+        id: true,
+        groupId: true,
+        nickname: true,
+        title: true,
+        content: true,
+        imageUrl: true,
+        location: true,
+        moment: true,
+        isPublic: true,
+        likeCount: true,
+        createdAt: true,
+        PostTags: {
+          select: {
+            Tag: {
+              select: {
+                name: true,
               },
             },
           },
-        ],
-        isPublic,
-        groupId,
-      },
-      include: {
-        _count: {
-          select: { Comments: true },
         },
       },
     });
 
-    const currentPage = parseInt(page);
-    const totalPages = Math.ceil(totalItemCount / limit);
-
-    const response = {
-      currentPage,
-      totalPages,
-      totalItemCount,
-      data: posts,
-    };
-
-    res.send(response);
-  } catch (err) {
-    next(err);
-  }
-};
-
-// 게시글 수정
-exports.updatePost = async (req, res, next) => {
-  const { postId } = req.params;
-  const {
-    nickname,
-    title,
-    content,
-    postPassword,
-    imageUrl,
-    tags,
-    location,
-    moment,
-    isPublic,
-  } = req.body;
-
-  try {
-    // 데이터베이스에서 해당 게시글 찾기
-    const post = await prisma.post.findUnique({ where: { id: postId } });
-
     if (!post) {
       throw new NotFoundError();
     }
 
-    // 필수 필드 확인
-    if (!nickname || !title || !content || !postPassword) {
-      throw new BadRequestError();
-    }
+    const postData = post;
+    postData.tags = post.PostTags.map((postTag) => postTag.Tag.name);
+    postData.commentCount = await getCommentCountByPostId(postId);
 
-    // 비밀번호 확인
-    const isMatch = await comparePassword(postPassword, post.password);
-    if (!isMatch) {
-      throw new WrongPasswordError();
-    }
-
-    // 게시글 내용 수정
-    const updatePost = await prisma.post.update({
-      where: { id: postId },
-      data: {
-        nickname,
-        title,
-        content,
-        imageUrl,
-        tags,
-        location,
-        moment,
-        isPublic,
-      },
-    });
-
-    // 변경된 게시글 저장
-    await post.save();
-
-    // 변경된 태그 수정
-    await updateTags(tags, postId);
-
-    const postWithDetails = await getPostDetailsById(postId);
-    // 수정된 게시글의 응답 반환
-    return res.status(200).send(postWithDetails);
+    return postData;
   } catch (err) {
-    next(err);
+    throw err;
   }
 };
 
-// 게시글 삭제
-exports.deletePost = async (req, res, next) => {
-  const { postId } = req.params;
-  const { postPassword } = req.body;
-
+const getCommentCountByPostId = async (postId) => {
   try {
-    // 데이터베이스에서 해당 게시글 찾기
-    const post = await prisma.post.findUnique({
-      where: { id: postId },
+    const commentCount = await prisma.comment.count({
+      where: { postId },
     });
-
-    if (!post) {
-      throw new NotFoundError();
-    }
-
-    if (!postPassword) {
-      throw new BadRequestError();
-    }
-
-    // 비밀번호 확인
-    const isMatch = await comparePassword(postPassword, post.password);
-    if (!isMatch) {
-      throw new WrongPasswordError();
-    }
-
-    // 게시글 삭제
-    await prisma.post.delete({
-      where: { id: postId },
-    });
-
-    return res.status(200).json({ message: "게시글 삭제 성공" });
+    return commentCount;
   } catch (err) {
-    next(err);
+    throw err;
   }
 };
 

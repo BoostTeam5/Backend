@@ -1,7 +1,8 @@
 import express from "express";
 import postController from "../controllers/postController";
+//댓글 관련 내용 추가 필요
 
-const router = express();
+const router = express.Router();
 
 // 게시글 상세 정보 조회
 router.get("/:postId", postController.getPostById);
