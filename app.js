@@ -1,8 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import pool from './config/db.js';
-import groupRoutes from './routes/groups.js';
-import postRoutes from './routes/posts.js';
+import cors from 'cors';
+import prisma from './config/prismaClient.js';
+import postsRouter from './routes/posts.js';
 
 dotenv.config();
 
@@ -10,15 +10,21 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // 기본 미들웨어 설정
+app.use(cors());
 app.use(express.json());
-app.use('/api/groups', groupRoutes);
-app.use('/api/posts', postRoutes);
+app.use('/api', postsRouter);
 
-// 간단한 헬스 체크 라우트 추가
+//기본 라우트 
 app.get('/', (req, res) => {
-    res.status(200).send('Hello express');
-  });
+  res.send('Server is running!');
+});
+
+process.on('SIGINT', async () => {
+  console.log('Disconnecting Prisma...');
+  await prisma.$disconnect();
+  process.exit(0);
+});
 
 app.listen(PORT, () => {
-    console.log(`🚀 Server started on port ${PORT}`);
+    console.log(`Server started on port ${PORT}`);
   });
