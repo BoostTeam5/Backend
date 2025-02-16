@@ -1,0 +1,9 @@
+POST http://localhost:3000/api/groups
+Content-Type: application/json
+
+{
+  "name": "TEST",
+  "password": "abcd",
+  "isPublic": true,
+  "introduction": "test."
+}

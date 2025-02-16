@@ -1,11 +1,10 @@
-node_modules
 # Keep environment variables out of version control
 .env
 yarn.lock
 package-lock.json
 
 # Node modules
-node_modules/
+node_modules
 
 # OS system files
 .DS_Store

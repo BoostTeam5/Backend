@@ -32,7 +32,7 @@ model posts {
   commentCount Int?        @default(0)
   createdAt    DateTime?   @default(now()) @db.DateTime(0)
   post_tags    post_tags[]
-  groups       groups      @relation(fields: [groupId], references: [groupId], onDelete: Cascade, onUpdate: NoAction, map: "posts_ibfk_1")
+  groups        groups      @relation(fields: [groupId], references: [groupId], onDelete: Cascade, onUpdate: NoAction, map: "posts_ibfk_1")
 
   @@index([groupId], map: "groupId")
 }
