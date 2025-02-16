@@ -6,16 +6,12 @@ const createGroup = async (req, res) => {
   try {
     const { name, password, imageUrl, isPublic, introduction } = req.body;
 
-    // 필수 값 체크
     if (!name || !password) {
       return res.status(400).json({ message: "잘못된 요청입니다" });
     }
-    //console.log("원본 비밀번호:", password);
 
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    
-    //console.log("해싱된 비밀번호:", hashedPassword);
 
     const newGroup = await Group.createGroup({
       name,
@@ -93,4 +89,49 @@ const getGroups = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-export { createGroup, getGroups };
+
+//그룹 수정
+const updateGroup = async (req, res) => {
+  try {
+    const groupId = parseInt(req.params.groupId, 10);
+    const { name, password, imageUrl, isPublic, introduction } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: "잘못된 요청입니다" });
+    }
+
+    try {
+      //Prisma에서 비밀번호 검증 + 업데이트 실행
+      const updatedGroup = await Group.updateGroupById(groupId, password, {
+        name: name ?? undefined,
+        imageUrl: imageUrl ?? undefined,
+        isPublic: isPublic ?? undefined,
+        introduction: introduction ?? undefined,
+      });
+
+      res.status(200).json({
+        id: updatedGroup.groupId,
+        name: updatedGroup.name,
+        imageUrl: updatedGroup.imageUrl,
+        isPublic: updatedGroup.isPublic,
+        likeCount: updatedGroup.likeCount,
+        badges: [],
+        postCount: updatedGroup.postCount,
+        createdAt: updatedGroup.createdAt,
+        introduction: updatedGroup.introduction,
+      });
+    } catch (error) {
+      if (error.message === "비밀번호가 틀렸습니다") {
+        return res.status(403).json({ message: error.message });
+      }
+      if (error.message === "존재하지 않습니다") {
+        return res.status(404).json({ message: error.message });
+      }
+      throw error;
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export { createGroup, getGroups, updateGroup };
