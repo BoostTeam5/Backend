@@ -1,5 +1,5 @@
 import express from "express";
-import postController from "../controllers/postController";
+import postController from "../controllers/postController.js";
 import { createPost, getPostsByGroup, updatePost, delePost } from '../controllers/postController.js'; 
 //댓글 관련 내용 추가 필요
 

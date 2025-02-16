@@ -1,9 +1,6 @@
-import {
-  NotFoundError,
-  WrongPasswordError,
-  BadRequestError,
-} from "../utils/customError";
-import { comparePassword, hashPassword } from "../utils/passwordUtils";
+import { BadRequestError, WrongPasswordError, NotFoundError } from "../utils/customError.js";
+
+import { comparePassword, hashPassword } from "../utils/passwordUtils.js";
 import { PrismaClient } from "@prisma/client";
 import { createPostService } from '../services/postService.js';
 import { getPostsByGroupService } from '../services/postService.js';

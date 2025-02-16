@@ -3,3 +3,13 @@ node_modules
 .env
 yarn.lock
 package-lock.json
+
+# Node modules
+node_modules/
+
+# OS system files
+.DS_Store
+Thumbs.db
+
+#test files
+*.http
