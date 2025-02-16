@@ -32,7 +32,11 @@ model posts {
   commentCount Int?        @default(0)
   createdAt    DateTime?   @default(now()) @db.DateTime(0)
   post_tags    post_tags[]
+<<<<<<< HEAD
   teams        groups      @relation(fields: [groupId], references: [groupId], onDelete: Cascade, onUpdate: NoAction, map: "posts_ibfk_1")
+=======
+  teams        teams       @relation(fields: [groupId], references: [groupId], onDelete: Cascade, onUpdate: NoAction, map: "posts_ibfk_1")
+>>>>>>> feature/3-postsUpload
 
   @@index([groupId], map: "groupId")
 }
@@ -43,13 +47,21 @@ model tags {
   post_tags post_tags[]
 }
 
+<<<<<<< HEAD
 model groups {
+=======
+model teams {
+>>>>>>> feature/3-postsUpload
   groupId       Int       @id @default(autoincrement())
   name          String    @db.VarChar(255)
   imageUrl      String?   @db.VarChar(500)
   introduction  String?   @db.Text
   isPublic      Boolean?  @default(true)
+<<<<<<< HEAD
   groupPassword String    @db.VarChar(255)
+=======
+  groupPassword String?   @db.VarChar(255)
+>>>>>>> feature/3-postsUpload
   badgeCount    Int?      @default(0)
   postCount     Int?      @default(0)
   likeCount     Int?      @default(0)
