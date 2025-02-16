@@ -2,8 +2,8 @@ POST http://localhost:5000/api/groups
 Content-Type: application/json
 
 {
-  "name": "TEST",
-  "password": "abcd",
+  "name": "수정테스트, 비밀번호kkkk",
+  "password": "kkkk",
   "isPublic": true,
   "introduction": "test."
 }
@@ -11,11 +11,30 @@ Content-Type: application/json
 #####
 GET http://localhost:5000/api/groups?page=1&pageSize=5&sortBy=latest
 
-########
+#####
 GET http://localhost:5000/api/groups
 
-#######
-GET http://localhost:5000/api/groups?keyword=coding
+####
+GET http://localhost:5000/api/groups?keyword=test group
 ####
 GET http://localhost:5000/api/groups?isPublic=true
 ####
+
+
+PUT http://localhost:5000/api/groups/14
+Content-Type: application/json
+
+{
+  "name": "여러번 바꾼 이름",
+  "password": "kkkk",
+  "isPublic": false,
+  "introduction": "UpUpUpdated introduction"
+}
+####
+
+DELETE http://localhost:5000/api/groups/1
+Content-Type: application/json
+
+{
+  "password": "kkkk"
+}
