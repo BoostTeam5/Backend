@@ -7,7 +7,7 @@ const Group = {
   createGroup: async (data) => {
     return await prisma.groups.create({ data });
   },
-  
+
   //그룹 조회, 페이징 및 필터링
   getGroupsFromDB: async ({ page, pageSize, sortBy, keyword, isPublic }) => {
     let orderBy = {};
@@ -47,17 +47,7 @@ const Group = {
     if (totalItemCount === 0) {
       return { totalItemCount: 0, groups: [] };
     }
-    
-    //if (keyword) {
-    // whereCondition.AND = whereCondition.AND.map((condition) => {
-    //   if (condition.name) {
-    //      return { name: { contains: keyword, mode: "insensitive" } };
-    //    }
-    //    return condition;
-    // });
-    //}
 
-    // 🔹 findMany()에서만 mode: "insensitive" 적용 ✅
     let findManyWhereCondition = {
       AND: whereCondition.AND.map((condition) => {
         if (condition.name) {
@@ -66,7 +56,6 @@ const Group = {
        return condition;
      }),
    };
-
 
     const groups = await prisma.groups.findMany({
       where: findManyWhereCondition,
@@ -77,7 +66,6 @@ const Group = {
 
     return { totalItemCount, groups };
   },
-
 
   //특정 그룹 수정
   updateGroupById: async (groupId, password, data) => {
@@ -102,6 +90,17 @@ const Group = {
       data,
     });
   },
+
+  // 그룹 상세 조회
+  getGroupById: async (groupId) => {
+    return await prisma.groups.findUnique({
+      where: { groupId: Number(groupId) },  // groupId 사용
+    });
+  },
+
 };
+
+
+
 
 export default Group;

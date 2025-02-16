@@ -1,3 +1,4 @@
+//postController
 import { BadRequestError, WrongPasswordError, NotFoundError } from "../utils/customError.js";
 import { comparePassword, hashPassword } from "../utils/passwordUtils.js";
 import { PrismaClient } from "@prisma/client";

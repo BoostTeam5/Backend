@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import Group from "../models/groupModel.js";
 
-//그룹 등록
+// 그룹 등록
 const createGroup = async (req, res) => {
   try {
     const { name, password, imageUrl, isPublic, introduction } = req.body;
@@ -41,7 +41,7 @@ const createGroup = async (req, res) => {
   }
 };
 
-//그룹 조회
+// 그룹 조회
 const getGroups = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -90,7 +90,7 @@ const getGroups = async (req, res) => {
   }
 };
 
-//그룹 수정
+// 그룹 수정
 const updateGroup = async (req, res) => {
   try {
     const groupId = parseInt(req.params.groupId, 10);
@@ -101,7 +101,6 @@ const updateGroup = async (req, res) => {
     }
 
     try {
-      //Prisma에서 비밀번호 검증 + 업데이트 실행
       const updatedGroup = await Group.updateGroupById(groupId, password, {
         name: name ?? undefined,
         imageUrl: imageUrl ?? undefined,
@@ -134,4 +133,90 @@ const updateGroup = async (req, res) => {
   }
 };
 
-export { createGroup, getGroups, updateGroup };
+// 그룹 상세 정보 조회 // 특정 그룹 ID로 조회
+const getGroupDetails = async (req, res) => {
+  try {
+    const groupId = parseInt(req.params.groupId, 10);
+
+    console.log("groupId:", groupId);  // 확인용 로그
+
+    if (!groupId) {
+      return res.status(400).json({ message: "잘못된 요청입니다" });
+    }
+
+    const group = await Group.getGroupById(groupId);
+
+    if (!group) {
+      return res.status(404).json({ message: "그룹을 찾을 수 없습니다" });
+    }
+
+    res.status(200).json({
+      id: group.groupId,
+      name: group.name,
+      imageUrl: group.imageUrl,
+      isPublic: group.isPublic,
+      likeCount: group.likeCount,
+      badges: [], // 배지 목록은 추가 구현 필요
+      postCount: group.postCount,
+      createdAt: group.createdAt,
+      introduction: group.introduction,
+    });
+  } catch (error) {
+    console.error("Error fetching group by ID:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// 그룹 권한 확인// 그룹 권한 확인
+const verifyGroupPassword = async (req, res) => {
+  try {
+    const groupId = parseInt(req.params.groupId, 10);
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: "잘못된 요청입니다" });
+    }
+
+    // 그룹 정보 가져오기 (비밀번호 포함)
+    const group = await Group.getGroupById(groupId);
+
+    if (!group) {
+      return res.status(404).json({ message: "그룹을 찾을 수 없습니다" });
+    }
+
+    // 로그로 비밀번호 확인
+    console.log("입력한 비밀번호:", `"${password}"`);
+    console.log("DB에 저장된 비밀번호:", `"${group.groupPassword}"`);
+
+    
+    // 비밀번호 검증
+  let isMatch = false;
+
+  if (group.groupPassword.startsWith("$2b$")) {
+    // DB에 저장된 비밀번호가 해시값일 때
+    isMatch = await bcrypt.compare(password, group.groupPassword);
+  } else {
+    // DB에 저장된 비밀번호가 일반 문자열일 때
+    isMatch = password === group.groupPassword;
+  }
+
+  console.log("비밀번호 일치 여부:", isMatch);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "비밀번호가 틀렸습니다" });
+    }
+
+    res.status(200).json({ message: "비밀번호가 확인되었습니다" });
+  } catch (error) {
+    console.error("Error verifying group password:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
+export { createGroup, getGroups, updateGroup, getGroupDetails, verifyGroupPassword };
+
+
+
+
