@@ -23,8 +23,4 @@ class NotFoundError extends Error {
   }
 }
 
-module.exports = {
-  BadRequestError,
-  WrongPasswordError,
-  NotFoundError,
-};
+export { BadRequestError, WrongPasswordError, NotFoundError };

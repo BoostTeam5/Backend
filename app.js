@@ -1,11 +1,10 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const path = require("path");
+import express from "express";
+import dotenv from "dotenv";
+import path from "path";
 import cors from "cors";
 import prisma from "./config/prismaClient.js";
+import postRoutes from "./routes/postRoute.js";
 dotenv.config();
-
-const postRoutes = require("./routes/postRoute");
 
 const app = express();
 app.use(cors());
