@@ -1,4 +1,4 @@
-POST http://localhost:3000/api/groups
+POST http://localhost:5000/api/groups
 Content-Type: application/json
 
 {
@@ -7,3 +7,15 @@ Content-Type: application/json
   "isPublic": true,
   "introduction": "test."
 }
+
+#####
+GET http://localhost:5000/api/groups?page=1&pageSize=5&sortBy=latest
+
+########
+GET http://localhost:5000/api/groups
+
+#######
+GET http://localhost:5000/api/groups?keyword=coding
+####
+GET http://localhost:5000/api/groups?isPublic=true
+####
