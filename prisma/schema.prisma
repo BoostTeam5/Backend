@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model post_tags {
+  postId Int
+  tagId  Int
+  posts  posts @relation(fields: [postId], references: [postId], onDelete: Cascade, onUpdate: NoAction, map: "post_tags_ibfk_1")
+  tags   tags  @relation(fields: [tagId], references: [tagId], onDelete: Cascade, onUpdate: NoAction, map: "post_tags_ibfk_2")
+
+  @@id([postId, tagId])
+  @@index([tagId], map: "tagId")
+}
+
+model posts {
+  postId       Int         @id @default(autoincrement())
+  groupId      Int
+  nickname     String      @db.VarChar(255)
+  title        String      @db.VarChar(255)
+  imageUrl     String?     @db.VarChar(500)
+  content      String      @db.Text
+  location     String?     @db.VarChar(255)
+  moment       DateTime?   @db.Date
+  isPublic     Boolean?    @default(true)
+  postPassword String?     @db.VarChar(255)
+  likeCount    Int?        @default(0)
+  commentCount Int?        @default(0)
+  createdAt    DateTime?   @default(now()) @db.DateTime(0)
+  post_tags    post_tags[]
+  teams        groups      @relation(fields: [groupId], references: [groupId], onDelete: Cascade, onUpdate: NoAction, map: "posts_ibfk_1")
+
+  @@index([groupId], map: "groupId")
+}
+
+model tags {
+  tagId     Int         @id @default(autoincrement())
+  tagName   String      @unique(map: "tagName") @db.VarChar(50)
+  post_tags post_tags[]
+}
+
+model groups {
+  groupId       Int       @id @default(autoincrement())
+  name          String    @db.VarChar(255)
+  imageUrl      String?   @db.VarChar(500)
+  introduction  String?   @db.Text
+  isPublic      Boolean?  @default(true)
+  groupPassword String    @db.VarChar(255)
+  badgeCount    Int?      @default(0)
+  postCount     Int?      @default(0)
+  likeCount     Int?      @default(0)
+  createdAt     DateTime? @default(now()) @db.DateTime(0)
+  posts         posts[]
+}
