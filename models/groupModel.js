@@ -48,16 +48,8 @@ const Group = {
       return { totalItemCount: 0, groups: [] };
     }
     
-    //if (keyword) {
-    // whereCondition.AND = whereCondition.AND.map((condition) => {
-    //   if (condition.name) {
-    //      return { name: { contains: keyword, mode: "insensitive" } };
-    //    }
-    //    return condition;
-    // });
-    //}
 
-    // 🔹 findMany()에서만 mode: "insensitive" 적용 ✅
+    // findMany()에서만 mode: "insensitive" 
     let findManyWhereCondition = {
       AND: whereCondition.AND.map((condition) => {
         if (condition.name) {
@@ -83,11 +75,11 @@ const Group = {
   updateGroupById: async (groupId, password, data) => {
     const group = await prisma.groups.findUnique({
       where: { groupId: Number(groupId) },
-      select: { groupPassword: true }, // 🔹 비밀번호만 가져옴
+      select: { groupPassword: true },
     });
 
     if (!group) {
-      throw new Error("존재하지 않는 그룹입니다.");
+      throw new Error("존재하지 않습니다");
     }
 
     //비밀번호 검증
@@ -101,6 +93,31 @@ const Group = {
       where: { groupId: Number(groupId) },
       data,
     });
+  },
+
+
+  //그룹 삭제
+  deleteGroupById: async (groupId, password) => {
+    const group = await prisma.groups.findUnique({
+      where: { groupId: Number(groupId) },
+      select: { groupPassword: true }, 
+    });
+
+    if (!group) {
+      throw new Error("존재하지 않습니다");
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, group.groupPassword);
+    if (!isPasswordCorrect) {
+      throw new Error("비밀번호가 틀렸습니다");
+    }
+
+    //비밀번호가 맞으면 그룹 삭제
+    await prisma.groups.delete({
+      where: { groupId: Number(groupId) },
+    });
+
+    return { message: "그룹 삭제 성공" };
   },
 };
 

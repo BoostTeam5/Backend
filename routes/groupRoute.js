@@ -1,5 +1,5 @@
 import express from "express";
-import { createGroup, getGroups, updateGroup } from "../controllers/groupController.js";
+import { createGroup, getGroups, updateGroup, deleteGroup } from "../controllers/groupController.js";
 
 const router = express.Router();
 
@@ -11,5 +11,8 @@ router.get("/groups", getGroups);
 
 //그룹 수정하기
 router.put("/groups/:groupId", updateGroup);
+
+//그룹 삭제하기
+router.delete("/groups/:groupId", deleteGroup);
 
 export default router;

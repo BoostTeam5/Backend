@@ -31,3 +31,10 @@ Content-Type: application/json
   "introduction": "UpUpUpdated introduction"
 }
 ####
+
+DELETE http://localhost:5000/api/groups/1
+Content-Type: application/json
+
+{
+  "password": "kkkk"
+}
