@@ -48,18 +48,28 @@ const Group = {
       return { totalItemCount: 0, groups: [] };
     }
     
-    if (keyword) {
-     whereCondition.AND = whereCondition.AND.map((condition) => {
-       if (condition.name) {
-          return { name: { contains: keyword, mode: "insensitive" } };
-        }
-        return condition;
-     });
-    }
+    //if (keyword) {
+    // whereCondition.AND = whereCondition.AND.map((condition) => {
+    //   if (condition.name) {
+    //      return { name: { contains: keyword, mode: "insensitive" } };
+    //    }
+    //    return condition;
+    // });
+    //}
+
+    // 🔹 findMany()에서만 mode: "insensitive" 적용 ✅
+    let findManyWhereCondition = {
+      AND: whereCondition.AND.map((condition) => {
+        if (condition.name) {
+          return { name: { contains: keyword.toLowerCase(), } };
+       }
+       return condition;
+     }),
+   };
 
 
     const groups = await prisma.groups.findMany({
-      where: whereCondition,
+      where: findManyWhereCondition,
       orderBy: orderBy,
       skip: (page - 1) * pageSize,
       take: pageSize,

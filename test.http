@@ -15,7 +15,7 @@ GET http://localhost:5000/api/groups?page=1&pageSize=5&sortBy=latest
 GET http://localhost:5000/api/groups
 
 ####
-GET http://localhost:5000/api/groups?keyword=TEST
+GET http://localhost:5000/api/groups?keyword=test group
 ####
 GET http://localhost:5000/api/groups?isPublic=true
 ####
