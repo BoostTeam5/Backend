@@ -11,8 +11,11 @@ import {
   updatePostService,
   deletePostService,
 } from "../services/postService.js";
-
-//배지, 태그관련 import 필요
+import {
+  checkConsecutiveDays,
+  checkPostCount,
+  checkPostLikeCount,
+} from "../services/badgeService.js";
 
 //게시물 생성(POST)
 const createPost = async (req, res) => {
@@ -65,6 +68,10 @@ const createPost = async (req, res) => {
       commentCount: newPost.commentCount,
       createdAt: newPost.createdAt.toISOString(),
     };
+
+    await checkPostCount(newPost.groupId); // 게시물 수 체크
+    await checkConsecutiveDays(newPost.groupId); // 연속 일수 체크
+    console.log("배지 조건 체크 완료");
 
     res.status(200).json(formattedPost);
   } catch (error) {
@@ -279,7 +286,7 @@ const verifyPostPassword = async (req, res, next) => {
 
   try {
     // 데이터베이스에서 해당 게시글 찾기
-    const post = await prisma.post.findUnique({
+    const post = await prisma.posts.findUnique({
       where: { id: postId },
     });
 
@@ -310,7 +317,7 @@ const likePost = async (req, res, next) => {
 
   try {
     // 데이터베이스에서 해당 게시글 찾기
-    const post = await prisma.post.findUnique({
+    const post = await prisma.posts.findUnique({
       where: { id: postId },
     });
 
@@ -318,7 +325,7 @@ const likePost = async (req, res, next) => {
       throw new NotFoundError();
     }
 
-    const updatePost = await prisma.post.update({
+    const updatePost = await prisma.posts.update({
       where: { id: postId },
       data: { likecount: post.likeCount + 1 },
     });
@@ -341,7 +348,7 @@ const isPostPublic = async (req, res, next) => {
 
   try {
     // 데이터베이스에서 해당 게시글 찾기
-    const post = await prisma.post.findUnique({
+    const post = await prisma.posts.findUnique({
       where: { id: postId },
       select: { id: true, isPublic: true },
     });
