@@ -29,4 +29,5 @@ router.get('/groups/:groupId/is-public', checkGroupPublicStatus);
 // 그룹 공감하기
 router.post("/groups/:groupId/like", likeGroup);
 
+
 export default router;

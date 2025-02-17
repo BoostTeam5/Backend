@@ -22,4 +22,6 @@ router.put('/api/posts/:postId', postController.updatePost);
 //게시글 삭제
 router.delete('/api/posts/:postId', postController.deletePost);
 
+
 export default router;
+
