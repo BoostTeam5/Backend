@@ -167,7 +167,6 @@ const getGroupDetails = async (req, res) => {
   }
 };
 
-// 그룹 권한 확인// 그룹 권한 확인
 const verifyGroupPassword = async (req, res) => {
   try {
     const groupId = parseInt(req.params.groupId, 10);
@@ -184,23 +183,25 @@ const verifyGroupPassword = async (req, res) => {
       return res.status(404).json({ message: "그룹을 찾을 수 없습니다" });
     }
 
-    // 로그로 비밀번호 확인
     console.log("입력한 비밀번호:", `"${password}"`);
     console.log("DB에 저장된 비밀번호:", `"${group.groupPassword}"`);
 
-    
-    // 비밀번호 검증
-  let isMatch = false;
+    let isMatch = false;
 
-  if (group.groupPassword.startsWith("$2b$")) {
-    // DB에 저장된 비밀번호가 해시값일 때
-    isMatch = await bcrypt.compare(password, group.groupPassword);
-  } else {
-    // DB에 저장된 비밀번호가 일반 문자열일 때
-    isMatch = password === group.groupPassword;
-  }
+    try {
+      if (group.groupPassword.startsWith("$2b$")) {
+        // DB에 저장된 비밀번호가 해시값일 때
+        isMatch = await bcrypt.compare(password, group.groupPassword);
+      } else {
+        // DB에 저장된 비밀번호가 일반 문자열일 때
+        isMatch = password === group.groupPassword;
+      }
+    } catch (err) {
+      console.error("비밀번호 검증 오류:", err);
+      return res.status(500).json({ message: "비밀번호 검증 중 오류 발생" });
+    }
 
-  console.log("비밀번호 일치 여부:", isMatch);
+    console.log("비밀번호 일치 여부:", isMatch);
 
     if (!isMatch) {
       return res.status(401).json({ message: "비밀번호가 틀렸습니다" });

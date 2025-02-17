@@ -17,7 +17,7 @@ router.get("/groups", getGroups);
 router.get("/groups/:groupId", getGroupDetails);  // <-- groupId를 URL 파라미터로 받음
 
 // 권한 확인하기
-router.post("/api/groups/:groupId/verify-password", verifyGroupPassword);
+router.post('/groups/:groupId/verify-password', verifyGroupPassword);
 
 // 그룹 공개 여부 확인하기 
 router.get('/groups/:groupId/is-public', checkGroupPublicStatus);
