@@ -1,4 +1,4 @@
-import { createComment, checkPostExists, getCommentCount, getComments, getCommentById, updateComment } from "../models/commentModel.js";
+import { createComment, checkPostExists, getCommentCount, getComments, getCommentById, updateComment, deleteComment } from "../models/commentModel.js";
 
 //댓글 등록
 export async function addComment(req, res) {
@@ -61,7 +61,7 @@ export async function getCommentList(req, res) {
       console.error("댓글 목록 조회 오류:", error);
       return res.status(500).json({ message: "서버 오류" });
     }
-  }
+}
 
 
 //댓글 수정
@@ -93,4 +93,30 @@ export async function editComment(req, res) {
       console.error("댓글 수정 오류:", error);
       return res.status(500).json({ message: "서버 오류" });
     }
-  }
+}
+
+//댓글 삭제
+export async function removeComment(req, res) {
+    const { commentId } = req.params;
+    const { password } = req.body;
+  
+    if (!password) {
+      return res.status(400).json({ message: "잘못된 요청입니다" });
+    }
+  
+    try {
+      const result = await deleteComment(commentId, password);
+  
+      if (result === null) {
+        return res.status(404).json({ message: "존재하지 않습니다" });
+      }
+      if (result === false) {
+        return res.status(403).json({ message: "비밀번호가 틀렸습니다" });
+      }
+  
+      return res.status(200).json({ message: "답글 삭제 성공" });
+    } catch (error) {
+      console.error("댓글 삭제 오류:", error);
+      return res.status(500).json({ message: "서버 오류" });
+    }
+}

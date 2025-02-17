@@ -80,3 +80,12 @@ Content-Type: application/json
   "content": "유익한 내용이네요~",
   "password": "은정"
 }
+
+
+###
+DELETE http://localhost:5000/api/comments/1
+Content-Type: application/json
+
+{
+  "password": "은정"
+}

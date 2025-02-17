@@ -53,8 +53,8 @@ export async function getCommentById(commentId) {
     });
   }
   
-  //댓글 수정 (비밀번호 검증 후 내용 업데이트)
-  export async function updateComment(commentId, nickname, content, password) {
+//댓글 수정 (비밀번호 검증 후 내용 업데이트)
+export async function updateComment(commentId, nickname, content, password) {
     const comment = await getCommentById(commentId);
   
     if (!comment) return null;
@@ -71,4 +71,24 @@ export async function getCommentById(commentId) {
         content,
       },
     });
+}
+
+//댓글 삭제 (비밀번호 검증 후 삭제)
+export async function deleteComment(commentId, password) {
+    const comment = await prisma.comments.findUnique({
+      where: { commentId: parseInt(commentId) },
+    });
+  
+    if (!comment) return null;
+  
+    // 비밀번호 검증
+    const isPasswordValid = await bcrypt.compare(password, comment.password);
+    if (!isPasswordValid) return false;
+  
+    // 댓글 삭제
+    await prisma.comments.delete({
+      where: { commentId: parseInt(commentId) },
+    });
+  
+    return true;
   }
