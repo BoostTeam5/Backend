@@ -1,4 +1,4 @@
-class BadRequestError extends Error {
+export class BadRequestError extends Error {
   constructor() {
     super("잘못된 요청입니다");
     this.name = "BadRequestError";
@@ -7,7 +7,7 @@ class BadRequestError extends Error {
   }
 }
 
-class WrongPasswordError extends Error {
+export class WrongPasswordError extends Error {
   constructor() {
     super("비밀번호가 틀렸습니다");
     this.name = "WrongPasswordError";
@@ -15,12 +15,10 @@ class WrongPasswordError extends Error {
   }
 }
 
-class NotFoundError extends Error {
+export class NotFoundError extends Error {
   constructor() {
     super("존재하지 않습니다");
     this.name = "NotFoundError";
     this.statusCode = 404;
   }
 }
-
-export { BadRequestError, WrongPasswordError, NotFoundError };

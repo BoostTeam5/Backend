@@ -1,18 +1,21 @@
 import {
-  NotFoundError,
-  WrongPasswordError,
   BadRequestError,
+  WrongPasswordError,
+  NotFoundError,
 } from "../utils/customError.js";
 import { comparePassword, hashPassword } from "../utils/passwordUtils.js";
 import { PrismaClient } from "@prisma/client";
-import { createPostService } from "../services/postService.js";
-import { getPostsByGroupService } from "../services/postService.js";
-import { updatePostService } from "../services/postService.js";
-import { deletePostService } from "../services/postService.js";
+import {
+  createPostService,
+  getPostsByGroupService,
+  updatePostService,
+  deletePostService,
+} from "../services/postService.js";
+
 //배지, 태그관련 import 필요
 
 //게시물 생성(POST)
-export const createPost = async (req, res) => {
+const createPost = async (req, res) => {
   const { groupId } = req.params;
   const {
     nickname,
@@ -71,7 +74,7 @@ export const createPost = async (req, res) => {
 };
 
 //그룹별 게시물 조회(GET)
-export const getPostsByGroup = async (req, res) => {
+const getPostsByGroup = async (req, res) => {
   const { groupId } = req.params;
   const {
     page = 1,
@@ -119,7 +122,7 @@ export const getPostsByGroup = async (req, res) => {
 };
 
 //게시물 수정(PUT)
-export const updatePost = async (req, res) => {
+const updatePost = async (req, res) => {
   const { postId } = req.params;
   const updateData = req.body;
 
@@ -172,7 +175,7 @@ export const updatePost = async (req, res) => {
 };
 
 //게시물 삭제(DELETE)
-export const deletePost = async (req, res) => {
+const deletePost = async (req, res) => {
   const { postId } = req.params;
   const { postPassword } = req.body; // 클라이언트가 비밀번호를 보내야 함
 
@@ -257,7 +260,7 @@ const getCommentCountByPostId = async (postId) => {
 };
 
 // 게시글 상세 조회
-exports.getPostById = async (req, res, next) => {
+const getPostById = async (req, res, next) => {
   const { postId } = req.params;
 
   try {
@@ -270,7 +273,7 @@ exports.getPostById = async (req, res, next) => {
 };
 
 // 게시글 조회 권한 확인
-exports.verifyPostPassword = async (req, res, next) => {
+const verifyPostPassword = async (req, res, next) => {
   const { postId } = req.params;
   const { password } = req.body;
 
@@ -302,7 +305,7 @@ exports.verifyPostPassword = async (req, res, next) => {
 };
 
 // 게시글 공감하기
-exports.likePost = async (req, res, next) => {
+const likePost = async (req, res, next) => {
   const { postId } = req.params;
 
   try {
@@ -333,7 +336,7 @@ exports.likePost = async (req, res, next) => {
 };
 
 // 게시글 공개 여부 확인
-exports.isPostPublic = async (req, res, next) => {
+const isPostPublic = async (req, res, next) => {
   const { postId } = req.params;
 
   try {
@@ -356,3 +359,16 @@ exports.isPostPublic = async (req, res, next) => {
     next(err);
   }
 };
+
+const postController = {
+  createPost,
+  getPostsByGroup,
+  updatePost,
+  deletePost,
+  getPostById,
+  verifyPostPassword,
+  likePost,
+  isPostPublic,
+};
+
+export default postController;

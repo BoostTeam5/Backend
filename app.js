@@ -1,23 +1,24 @@
 import express from "express";
 import dotenv from "dotenv";
-import path from "path";
 import cors from "cors";
+import path from "path";
 import prisma from "./config/prismaClient.js";
 import postRoutes from "./routes/postRoute.js";
-dotenv.config();
+import groupRouter from "./routes/groupRoute.js";
 
+dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/posts", postRoutes);
+// 라우터 설정
+app.use("/api", groupRouter);
 
+app.use("/", postRoutes);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-dotenv.config();
 
 process.on("SIGINT", async () => {
   console.log("Disconnecting Prisma...");
