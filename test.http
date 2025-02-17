@@ -69,3 +69,14 @@ Content-Type: application/json
 
 ####
 GET http://localhost:5000/api/posts/1/comments?page=1&pageSize=10
+
+
+####
+PUT http://localhost:5000/api/comments/2
+Content-Type: application/json
+
+{
+  "nickname": "은정",
+  "content": "유익한 내용이네요~",
+  "password": "은정"
+}
