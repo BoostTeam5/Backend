@@ -13,9 +13,11 @@ app.use(express.json());
 
 // 라우터 설정
 app.use("/api", groupRouter);
-
 app.use("/", postRoutes);
+
+// 환경 변수에서 PORT 가져오기 (기본값 5000)
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
@@ -25,5 +27,3 @@ process.on("SIGINT", async () => {
   await prisma.$disconnect();
   process.exit(0);
 });
-
-

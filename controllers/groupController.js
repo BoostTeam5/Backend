@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import Group from "../models/groupModel.js";
 
-//그룹 등록
+// 그룹 등록
 const createGroup = async (req, res) => {
   try {
     const { name, password, imageUrl, isPublic, introduction } = req.body;
@@ -41,7 +41,7 @@ const createGroup = async (req, res) => {
   }
 };
 
-//그룹 조회
+// 그룹 목록 조회
 const getGroups = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -59,19 +59,10 @@ const getGroups = async (req, res) => {
     });
 
     const totalPages = Math.ceil(totalItemCount / pageSize);
-    if (totalItemCount === 0) {
-      return res.status(200).json({
-        currentPage: page,
-        totalPages: 0,
-        totalItemCount: 0,
-        data: [],
-      });
-    }
-
     res.status(200).json({
       currentPage: page,
-      totalPages: totalPages,
-      totalItemCount: totalItemCount,
+      totalPages,
+      totalItemCount,
       data: groups.map((group) => ({
         id: group.groupId,
         name: group.name,
@@ -90,7 +81,39 @@ const getGroups = async (req, res) => {
   }
 };
 
-//그룹 수정
+// 그룹 상세 조회
+const getGroupDetails = async (req, res) => {
+  try {
+    const groupId = parseInt(req.params.groupId, 10);
+
+    if (!groupId) {
+      return res.status(400).json({ message: "잘못된 요청입니다" });
+    }
+
+    const group = await Group.getGroupById(groupId);
+
+    if (!group) {
+      return res.status(404).json({ message: "그룹을 찾을 수 없습니다" });
+    }
+
+    res.status(200).json({
+      id: group.groupId,
+      name: group.name,
+      imageUrl: group.imageUrl,
+      isPublic: group.isPublic,
+      likeCount: group.likeCount,
+      badges: [],
+      postCount: group.postCount,
+      createdAt: group.createdAt,
+      introduction: group.introduction,
+    });
+  } catch (error) {
+    console.error("Error fetching group by ID:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// 그룹 수정
 const updateGroup = async (req, res) => {
   try {
     const groupId = parseInt(req.params.groupId, 10);
@@ -101,7 +124,6 @@ const updateGroup = async (req, res) => {
     }
 
     try {
-      //Prisma에서 비밀번호 검증 + 업데이트 실행
       const updatedGroup = await Group.updateGroupById(groupId, password, {
         name: name ?? undefined,
         imageUrl: imageUrl ?? undefined,
@@ -134,22 +156,17 @@ const updateGroup = async (req, res) => {
   }
 };
 
-
-//그룹 삭제
+// 그룹 삭제
 const deleteGroup = async (req, res) => {
   try {
     const groupId = parseInt(req.params.groupId, 10);
-    if (isNaN(groupId)) {
-      return res.status(400).json({ message: "잘못된 요청입니다" });
-    }
-
     const { password } = req.body;
+
     if (!password) {
       return res.status(400).json({ message: "잘못된 요청입니다" });
     }
 
     try {
-      //Prisma에서 그룹 삭제 실행
       const result = await Group.deleteGroupById(groupId, password);
       res.status(200).json(result);
     } catch (error) {
@@ -165,4 +182,39 @@ const deleteGroup = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-export { createGroup, getGroups, updateGroup, deleteGroup };
+
+// 그룹 공개 여부 확인
+const checkGroupPublicStatus = async (req, res) => {
+  try {
+    const groupId = parseInt(req.params.groupId, 10);
+    const group = await Group.getGroupById(groupId);
+
+    if (!group) {
+      return res.status(404).json({ message: "그룹을 찾을 수 없습니다" });
+    }
+
+    res.status(200).json({ id: group.groupId, isPublic: group.isPublic });
+  } catch (error) {
+    console.error("Error checking group public status:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// 그룹 공감하기
+const likeGroup = async (req, res) => {
+  try {
+    const groupId = parseInt(req.params.groupId, 10);
+    const updatedGroup = await Group.likeGroupById(groupId);
+
+    if (!updatedGroup) {
+      return res.status(404).json({ message: "존재하지 않습니다" });
+    }
+
+    res.status(200).json({ message: "그룹 공감하기 성공" });
+  } catch (error) {
+    console.error("Error liking group:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export { createGroup, getGroups, getGroupDetails, updateGroup, deleteGroup, verifyGroupPassword, checkGroupPublicStatus, likeGroup };
