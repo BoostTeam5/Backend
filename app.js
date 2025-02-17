@@ -1,27 +1,28 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const path = require("path");
+import express from "express";
+import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
 import prisma from "./config/prismaClient.js";
+import postRoutes from "./routes/postRoute.js";
+import groupRouter from "./routes/groupRoute.js";
+
 dotenv.config();
-
-const postRoutes = require("./routes/postRoute");
-
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/posts", postRoutes);
+// 라우터 설정
+app.use("/api", groupRouter);
 
-const PORT = process.env.PORT || 5000;
+app.use("/", postRoutes);
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-dotenv.config();
 
 process.on("SIGINT", async () => {
   console.log("Disconnecting Prisma...");
   await prisma.$disconnect();
   process.exit(0);
 });
+
