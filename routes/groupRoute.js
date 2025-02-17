@@ -1,7 +1,7 @@
 
 // routes/groupRoute.js
 import express from "express";
-import { createGroup, getGroups, updateGroup, getGroupDetails, verifyGroupPassword, checkGroupPublicStatus, likeGroup } from "../controllers/groupController.js";
+import { createGroup, getGroups, updateGroup,deleteGroup, getGroupDetails, verifyGroupPassword, checkGroupPublicStatus, likeGroup } from "../controllers/groupController.js";
 
 const router = express.Router();
 
