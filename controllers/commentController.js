@@ -1,5 +1,6 @@
-import { createComment, checkPostExists } from "../models/commentModel.js";
+import { createComment, checkPostExists, getCommentCount, getComments } from "../models/commentModel.js";
 
+//댓글 등록
 export async function addComment(req, res) {
   const { postId } = req.params;
   const { nickname, content, password } = req.body;
@@ -28,3 +29,35 @@ export async function addComment(req, res) {
     return res.status(500).json({ message: "서버 오류" });
   }
 }
+
+//댓글 목록 조회
+export async function getCommentList(req, res) {
+    const { postId } = req.params;
+    const { page, pageSize } = req.query;
+  
+    //필수 파라미터 검증
+    if (!page || !pageSize || isNaN(page) || isNaN(pageSize) || page < 1 || pageSize < 1) {
+      return res.status(400).json({ message: "잘못된 요청입니다" });
+    }
+  
+    try {
+      const totalItemCount = await getCommentCount(postId);
+      const totalPages = Math.ceil(totalItemCount / pageSize);
+      const comments = await getComments(postId, parseInt(page), parseInt(pageSize));
+  
+      return res.status(200).json({
+        currentPage: parseInt(page),
+        totalPages: totalPages,
+        totalItemCount: totalItemCount,
+        data: comments.map((comment) => ({
+          id: comment.commentId,
+          nickname: comment.nickname,
+          content: comment.content,
+          createdAt: comment.createdAt,
+        })),
+      });
+    } catch (error) {
+      console.error("댓글 목록 조회 오류:", error);
+      return res.status(500).json({ message: "서버 오류" });
+    }
+  }

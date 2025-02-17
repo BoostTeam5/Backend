@@ -22,3 +22,27 @@ export async function checkPostExists(postId) {
     where: { postId: parseInt(postId) },
   });
 }
+
+
+export async function getCommentCount(postId) {
+    return prisma.comments.count({
+      where: { postId: parseInt(postId) },
+    });
+  }
+  
+  //댓글 목록 조회 (페이징 적용)
+  export async function getComments(postId, page, pageSize) {
+    const skip = (page - 1) * pageSize; // 페이징 계산
+    return prisma.comments.findMany({
+      where: { postId: parseInt(postId) },
+      orderBy: { createdAt: "desc" }, // 최신순 정렬
+      skip: skip,
+      take: parseInt(pageSize),
+      select: {
+        commentId: true,
+        nickname: true,
+        content: true,
+        createdAt: true,
+      },
+    });
+  }

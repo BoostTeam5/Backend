@@ -67,3 +67,5 @@ Content-Type: application/json
   "password": "민정"
 }
 
+####
+GET http://localhost:5000/api/posts/1/comments?page=1&pageSize=10
