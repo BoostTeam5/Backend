@@ -273,4 +273,4 @@ const likeGroup = async (req, res) => {
   }
 };
 
-export { createGroup, getGroups, updateGroup, getGroupDetails, verifyGroupPassword, checkGroupPublicStatus, likeGroup };
+export { createGroup, getGroups, updateGroup, deleteGroup, getGroupDetails, verifyGroupPassword, checkGroupPublicStatus, likeGroup };
