@@ -15,4 +15,5 @@ export const comparePassword = async (password, hashedPassword) => {
   } catch (err) {
     throw err;
   }
+
 };

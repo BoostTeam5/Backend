@@ -1,0 +1,40 @@
+### POST 요청 (데이터 추가)
+POST http://localhost:5001/api/groups
+
+### GET 요청 (모든 그룹 조회)
+GET http://localhost:5001/api/groups
+
+### GET 요청 (키워드 검색)
+GET http://localhost:5001/api/groups?keyword=test
+
+### PUT 요청 (데이터 수정)
+PUT http://localhost:5001/api/groups/1
+
+
+### GET 요청 (13번 그룹 상세 조회)
+GET http://localhost:5001/api/groups/13
+
+### POST 요청 (권한 조회 / 해시값)
+POST http://localhost:5001/api/groups/7/verify-password
+Content-Type: application/json
+
+{
+  "password": "$2b$10$DDeISD5RW6wtsrPY3wugFeYTFDx.1hXneuyfDA0RwFzy1JSFgRw9."
+}
+
+### POST 요청 (권한 조회 / 일반값)
+POST http://localhost:5001/api/groups/1/verify-password
+Content-Type: application/json
+
+{
+  "password": "1234"
+}
+
+### GET 요청 (그룹 공개 여부 확인)
+GET http://localhost:5001/api/groups/1/is-public
+
+Accept: application/json
+
+### POST 요청 (그룹 공감)
+POST http://localhost:5001/api/groups/1/like
+Accept: application/json

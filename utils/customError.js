@@ -21,4 +21,5 @@ export class NotFoundError extends Error {
     this.name = "NotFoundError";
     this.statusCode = 404;
   }
+
 }
