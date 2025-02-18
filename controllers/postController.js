@@ -11,10 +11,10 @@ import {
   updatePostService,
   deletePostService,
 } from "../services/postService.js";
+import { uploadFileToS3, deleteFileFromS3 } from "../services/imageService.js";
 
 //배지, 태그관련 import 필요
 
-//게시물 생성(POST)
 const createPost = async (req, res) => {
   const { groupId } = req.params;
   const {
@@ -22,20 +22,43 @@ const createPost = async (req, res) => {
     title,
     content,
     postPassword,
-    imageUrl,
     tags,
     location,
     moment,
     isPublic,
   } = req.body;
 
-  // 요청 데이터 검증
   if (!nickname || !title || !content) {
     return res.status(400).json({ message: "잘못된 요청입니다" });
   }
 
   try {
-    // 서비스에서 데이터 받아오기
+    let parsedIsPublic = null;
+    if (typeof isPublic === "string") {
+      parsedIsPublic = isPublic.toLowerCase() === "true";
+    } else if (typeof isPublic === "boolean") {
+      parsedIsPublic = isPublic;
+    }
+
+    let parsedTags = [];
+    if (typeof tags === "string") {
+      try {
+        parsedTags = JSON.parse(tags);
+        if (!Array.isArray(parsedTags)) parsedTags = [];
+      } catch (error) {
+        parsedTags = [];
+      }
+    } else if (Array.isArray(tags)) {
+      parsedTags = tags;
+    }
+
+    let imageUrl = null;
+    if (req.file) {
+      const folder = "posts"; // 게시물 저장 폴더 지정
+      const fileKey = await uploadFileToS3(req.file, req.file.mimetype, folder);
+      imageUrl = `${process.env.AWS_CLOUD_FRONT_URL}/${fileKey}`;
+    }
+
     const newPost = await createPostService({
       groupId: parseInt(groupId),
       nickname,
@@ -43,30 +66,27 @@ const createPost = async (req, res) => {
       content,
       postPassword,
       imageUrl,
-      tags,
+      tags: parsedTags,
       location,
       moment,
-      isPublic,
+      isPublic: parsedIsPublic,
     });
 
-    // 응답을 API 명세서에 맞게 가공
-    const formattedPost = {
+    res.status(201).json({
       id: newPost.postId,
       groupId: newPost.groupId,
       nickname: newPost.nickname,
       title: newPost.title,
       content: newPost.content,
       imageUrl: newPost.imageUrl,
-      tags: newPost.post_tags.map((pt) => pt.tags.tagName),
+      tags: newPost.tags,
       location: newPost.location,
       moment: newPost.moment?.toISOString().split("T")[0],
       isPublic: newPost.isPublic,
       likeCount: newPost.likeCount,
       commentCount: newPost.commentCount,
       createdAt: newPost.createdAt.toISOString(),
-    };
-
-    res.status(200).json(formattedPost);
+    });
   } catch (error) {
     console.error("게시글 등록 오류:", error);
     res.status(500).json({ error: "서버 오류로 게시글을 등록할 수 없습니다." });
@@ -174,17 +194,16 @@ const updatePost = async (req, res) => {
   }
 };
 
-//게시물 삭제(DELETE)
-const deletePost = async (req, res) => {
+export const deletePost = async (req, res) => {
   const { postId } = req.params;
   const { postPassword } = req.body; // 클라이언트가 비밀번호를 보내야 함
 
-  // 400 Bad Request (잘못된 요청)
   if (!postId || isNaN(postId)) {
     return res.status(400).json({ message: "잘못된 요청입니다" });
   }
 
   try {
+    // ✅ 불필요한 post 변수를 사용하지 않음
     const result = await deletePostService({
       postId: parseInt(postId),
       postPassword,
@@ -193,10 +212,10 @@ const deletePost = async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     if (error.message === "존재하지 않습니다.") {
-      return res.status(404).json({ message: "존재하지 않습니다" }); // 404 Not Found
+      return res.status(404).json({ message: "존재하지 않습니다" });
     }
     if (error.message === "비밀번호가 틀렸습니다.") {
-      return res.status(403).json({ message: "비밀번호가 틀렸습니다" }); // 403 Forbidden
+      return res.status(403).json({ message: "비밀번호가 틀렸습니다." });
     }
 
     console.error("게시글 삭제 오류:", error);
