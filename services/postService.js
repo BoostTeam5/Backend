@@ -1,4 +1,6 @@
-import prisma from "../config/prismaClient.js";
+import prisma from '../config/prismaClient.js';
+import { deleteFileFromS3 } from "../services/imageService.js"; 
+
 
 //게시물 생성(POST)
 export const createPostService = async (postData) => {
@@ -145,32 +147,44 @@ export const updatePostService = async ({ postId, updateData }) => {
   return updatedPost;
 };
 
-// 그룹 게시물 삭제 (DELETE)
-export const deletePostService = async ({ postId, postPassword }) => {
-  // 게시글이 존재하는지 확인
-  const existingPost = await prisma.posts.findUnique({
-    where: { postId: postId },
-  });
+export async function deletePostService({ postId, postPassword }) {
+  try {
+    // 게시글 조회 (이미지 URL 포함)
+    const post = await prisma.posts.findUnique({
+      where: { postId: postId },
+      select: {
+        imageUrl: true,
+        postPassword: true
+      }
+    });
 
-  // 404 Not Found
-  if (!existingPost) {
-    throw new Error("존재하지 않습니다.");
+    if (!post) {
+      throw new Error("존재하지 않습니다.");
+    }
+
+    // 비밀번호 검증
+    if (post.postPassword && post.postPassword !== postPassword) {
+      throw new Error("비밀번호가 틀렸습니다.");
+    }
+
+    // S3 이미지 삭제 (이미지가 존재할 경우)
+    if (post.imageUrl) {
+      const fileKey = post.imageUrl.replace(`${process.env.AWS_CLOUD_FRONT_URL}/`, ""); // S3 파일 키 추출
+      await deleteFileFromS3(fileKey);
+    }
+
+    // 게시글 삭제 (연관된 태그 데이터도 삭제)
+    await prisma.post_tags.deleteMany({
+      where: { postId: postId }
+    });
+
+    await prisma.posts.delete({
+      where: { postId: postId }
+    });
+
+    return { message: "게시글 삭제 성공" };
+  } catch (error) {
+    throw error; // 컨트롤러에서 처리하도록 에러 던지기
   }
+}
 
-  // 403 비밀번호 확인
-  if (existingPost.postPassword && existingPost.postPassword !== postPassword) {
-    throw new Error("비밀번호가 틀렸습니다.");
-  }
-
-  // 태그 삭제 (외래 키 무결성 오류 방지)
-  await prisma.post_tags.deleteMany({
-    where: { postId },
-  });
-
-  //게시글 삭제
-  await prisma.posts.delete({
-    where: { postId: postId },
-  });
-
-  return { message: "게시글 삭제 성공" };
-};

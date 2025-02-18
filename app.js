@@ -1,20 +1,18 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import path from "path";
 import prisma from "./config/prismaClient.js";
 import postRoutes from "./routes/postRoute.js";
 import groupRouter from "./routes/groupRoute.js";
 import commentRoutes from "./routes/commentRoute.js"
-
+import imageRouter from './routes/imageRoute.js';
 
 dotenv.config();
 const app = express();
+
 app.use(cors());
-
 app.use(express.json());
-
-// 라우터 설정
+app.use('/api', imageRouter);
 app.use("/api", groupRouter);
 app.use("/", postRoutes);
 app.use(commentRoutes);
