@@ -7,9 +7,11 @@ import postRoutes from "./routes/postRoute.js";
 import groupRouter from "./routes/groupRoute.js";
 import commentRoutes from "./routes/commentRoute.js"
 
+
 dotenv.config();
 const app = express();
 app.use(cors());
+
 app.use(express.json());
 
 // 라우터 설정
