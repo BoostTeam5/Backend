@@ -14,6 +14,11 @@ import {
 import { uploadFileToS3, deleteFileFromS3 } from "../services/imageService.js";
 
 //배지, 태그관련 import 필요
+import {
+  checkConsecutiveDays,
+  checkPostCount,
+  checkPostLikeCount,
+} from "../services/badgeService.js";
 
 const createPost = async (req, res) => {
   const { groupId } = req.params;
@@ -87,6 +92,12 @@ const createPost = async (req, res) => {
       commentCount: newPost.commentCount,
       createdAt: newPost.createdAt.toISOString(),
     });
+
+    await checkPostCount(newPost.groupId); // 게시물 수 체크
+    await checkConsecutiveDays(newPost.groupId); // 연속 일수 체크
+    console.log("배지 조건 체크 완료");
+
+    res.status(200).json(formattedPost);
   } catch (error) {
     console.error("게시글 등록 오류:", error);
     res.status(500).json({ error: "서버 오류로 게시글을 등록할 수 없습니다." });
@@ -166,7 +177,7 @@ const updatePost = async (req, res) => {
     }
 
     const formattedResponse = {
-      id: updatedPost.id,
+      id: updatedPost.postIdd,
       groupId: updatedPost.groupId,
       nickname: updatedPost.nickname,
       title: updatedPost.title,
@@ -227,10 +238,11 @@ const prisma = new PrismaClient();
 
 const getPostDetailsById = async (postId) => {
   try {
-    const post = await prisma.post.findUnique({
-      where: { id: postId },
+    const post = await prisma.posts.findUnique({
+      where: {
+        postId: parseInt(postId, 10), // postId를 정수로 변환
+      },
       select: {
-        id: true,
         groupId: true,
         nickname: true,
         title: true,
@@ -241,11 +253,12 @@ const getPostDetailsById = async (postId) => {
         isPublic: true,
         likeCount: true,
         createdAt: true,
-        PostTags: {
+        commentCount: true,
+        post_tags: {
           select: {
-            Tag: {
+            tags: {
               select: {
-                name: true,
+                tagName: true,
               },
             },
           },
@@ -258,7 +271,9 @@ const getPostDetailsById = async (postId) => {
     }
 
     const postData = post;
-    postData.tags = post.PostTags.map((postTag) => postTag.Tag.name);
+    post.tags = post.PostTags
+      ? post.PostTags.map((postTag) => postTag.Tag.name)
+      : [];
     postData.commentCount = await getCommentCountByPostId(postId);
 
     return postData;
@@ -269,7 +284,7 @@ const getPostDetailsById = async (postId) => {
 
 const getCommentCountByPostId = async (postId) => {
   try {
-    const commentCount = await prisma.comment.count({
+    const commentCount = await prisma.comments.count({
       where: { postId },
     });
     return commentCount;
@@ -283,7 +298,7 @@ const getPostById = async (req, res, next) => {
   const { postId } = req.params;
 
   try {
-    const postWithDetails = await getPostDetailsById(postId);
+    const postWithDetails = await getPostDetailsById(parseInt(postId, 10));
 
     return res.status(200).send(postWithDetails);
   } catch (err) {
@@ -298,7 +313,7 @@ const verifyPostPassword = async (req, res, next) => {
 
   try {
     // 데이터베이스에서 해당 게시글 찾기
-    const post = await prisma.post.findUnique({
+    const post = await prisma.posts.findUnique({
       where: { id: postId },
     });
 
@@ -329,7 +344,7 @@ const likePost = async (req, res, next) => {
 
   try {
     // 데이터베이스에서 해당 게시글 찾기
-    const post = await prisma.post.findUnique({
+    const post = await prisma.posts.findUnique({
       where: { id: postId },
     });
 
@@ -337,7 +352,7 @@ const likePost = async (req, res, next) => {
       throw new NotFoundError();
     }
 
-    const updatePost = await prisma.post.update({
+    const updatePost = await prisma.posts.update({
       where: { id: postId },
       data: { likecount: post.likeCount + 1 },
     });
@@ -360,7 +375,7 @@ const isPostPublic = async (req, res, next) => {
 
   try {
     // 데이터베이스에서 해당 게시글 찾기
-    const post = await prisma.post.findUnique({
+    const post = await prisma.posts.findUnique({
       where: { id: postId },
       select: { id: true, isPublic: true },
     });

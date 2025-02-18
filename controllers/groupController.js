@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import Group from "../models/groupModel.js";
+import { checkGroupLikeCount } from "../services/badgeService.js";
 
 // 그룹 등록
 const createGroup = async (req, res) => {
@@ -48,7 +49,8 @@ const getGroups = async (req, res) => {
     const pageSize = parseInt(req.query.pageSize) || 10;
     const sortBy = req.query.sortBy || "latest";
     const keyword = req.query.keyword || "";
-    const isPublic = req.query.isPublic !== undefined ? req.query.isPublic === "true" : null;
+    const isPublic =
+      req.query.isPublic !== undefined ? req.query.isPublic === "true" : null;
 
     const { totalItemCount, groups } = await Group.getGroupsFromDB({
       page,
@@ -266,6 +268,8 @@ const likeGroup = async (req, res) => {
       return res.status(404).json({ message: "존재하지 않습니다" });
     }
 
+    await checkGroupLikeCount(groupId);
+
     res.status(200).json({ message: "그룹 공감하기 성공" });
   } catch (error) {
     console.error("Error liking group:", error);
@@ -273,4 +277,13 @@ const likeGroup = async (req, res) => {
   }
 };
 
-export { createGroup, getGroups, updateGroup, deleteGroup, getGroupDetails, verifyGroupPassword, checkGroupPublicStatus, likeGroup };
+export {
+  createGroup,
+  getGroups,
+  updateGroup,
+  deleteGroup,
+  getGroupDetails,
+  verifyGroupPassword,
+  checkGroupPublicStatus,
+  likeGroup,
+};
