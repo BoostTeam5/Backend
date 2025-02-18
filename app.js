@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import prisma from './config/prismaClient.js';
 import postsRouter from './routes/posts.js';
+import imageRouter from './routes/imageRoute.js';
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use('/api', postsRouter);
+app.use('/api', imageRouter);
 
 //기본 라우트 
 app.get('/', (req, res) => {

@@ -18,19 +18,22 @@ export const s3 = new S3Client({
 // ✅ 허용된 이미지 확장자 목록
 const allowedExtensions = [".png", ".jpg", ".jpeg", ".bmp", ".gif"];
 
-// ✅ multer 설정 (S3에 직접 업로드)
 export const imageUploader = multer({
   storage: multerS3({
     s3: s3,
     bucket: process.env.AWS_S3_BUCKET_NAME,
-    contentType: multerS3.AUTO_CONTENT_TYPE,
+    contentType: multerS3.AUTO_CONTENT_TYPE, // 자동으로 Content-Type 설정
+    acl: "public-read", // 공개 접근 가능하도록 설정
     key: (req, file, callback) => {
-      const uploadDirectory = req.params.type;
-      const extension = path.extname(file.originalname);
+      const uploadDirectory = req.params.type || "uploads"; // 기본 폴더 설정
+      const fileExtension = path.extname(file.originalname);
+      const fileName = `${uploadDirectory}/${uuidv4()}${fileExtension}`; 
 
-      callback(null, `${uploadDirectory}/${Date.now()}_${file.originalname}`);
+      console.log(`📝 S3 업로드 경로: ${fileName}`); 
+
+      callback(null, fileName);
     },
-    acl: "public-read",
   }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB 제한
 });
