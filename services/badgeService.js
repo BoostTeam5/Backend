@@ -81,7 +81,7 @@ const checkGroupLikeCount = async (groupId) => {
     select: { likeCount: true },
   });
 
-  if (group.likeCount >= 7) {
+  if (group.likeCount >= 10000) {
     await awardBadge(groupId, BADGE_GROUP_LIKE_COUNT_10000);
   }
 };
