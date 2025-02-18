@@ -2,11 +2,12 @@ import { BadRequestError, WrongPasswordError, NotFoundError } from "../utils/cus
 import { comparePassword, hashPassword } from "../utils/passwordUtils.js";
 import { PrismaClient } from "@prisma/client";
 import { createPostService, getPostsByGroupService, updatePostService, deletePostService } from '../services/postService.js';
+import { uploadFileToS3, deleteFileFromS3 } from "../services/imageService.js";
 
 
 //배지, 태그관련 import 필요
 
-export const createPost = async (req, res) => {
+const createPost = async (req, res) => {
   const { groupId } = req.params;
   const { nickname, title, content, postPassword, tags, location, moment, isPublic } = req.body;
 
