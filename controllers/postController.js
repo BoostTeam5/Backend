@@ -3,6 +3,7 @@ import { getPostsByGroupService } from '../services/postService.js';
 import { updatePostService } from '../services/postService.js';
 import { deletePostService } from '../services/postService.js';
 import { uploadFileToS3 } from "../services/imageService.js";
+import { deleteFileFromS3 } from "../services/imageService.js"; // S3 파일 삭제 함수 추가
 
 export const createPost = async (req, res) => {
   const { groupId } = req.params;
@@ -166,17 +167,16 @@ export const updatePost = async (req, res) => {
   }
 };
 
-//게시물 삭제(DELETE)
 export const deletePost = async (req, res) => {
   const { postId } = req.params;
   const { postPassword } = req.body; // 클라이언트가 비밀번호를 보내야 함
 
-  // 400 Bad Request (잘못된 요청)
   if (!postId || isNaN(postId)) {
-    return res.status(400).json({ "message": "잘못된 요청입니다" });
+    return res.status(400).json({ message: "잘못된 요청입니다" });
   }
 
   try {
+    // ✅ 불필요한 post 변수를 사용하지 않음
     const result = await deletePostService({
       postId: parseInt(postId),
       postPassword
@@ -185,10 +185,10 @@ export const deletePost = async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     if (error.message === "존재하지 않습니다.") {
-      return res.status(404).json({ message: "존재하지 않습니다" }); // 404 Not Found
+      return res.status(404).json({ message: "존재하지 않습니다" });
     }
     if (error.message === "비밀번호가 틀렸습니다.") {
-      return res.status(403).json({ message: "비밀번호가 틀렸습니다" }); // 403 Forbidden
+      return res.status(403).json({ message: "비밀번호가 틀렸습니다." });
     }
 
     console.error("게시글 삭제 오류:", error);
