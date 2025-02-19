@@ -31,6 +31,7 @@ const createPost = async (req, res) => {
     location,
     moment,
     isPublic,
+    imageUrl, // 프론트에서 받아온 이미지 URL
   } = req.body;
 
   if (!nickname || !title || !content) {
@@ -38,31 +39,8 @@ const createPost = async (req, res) => {
   }
 
   try {
-    let parsedIsPublic = null;
-    if (typeof isPublic === "string") {
-      parsedIsPublic = isPublic.toLowerCase() === "true";
-    } else if (typeof isPublic === "boolean") {
-      parsedIsPublic = isPublic;
-    }
-
-    let parsedTags = [];
-    if (typeof tags === "string") {
-      try {
-        parsedTags = JSON.parse(tags);
-        if (!Array.isArray(parsedTags)) parsedTags = [];
-      } catch (error) {
-        parsedTags = [];
-      }
-    } else if (Array.isArray(tags)) {
-      parsedTags = tags;
-    }
-
-    let imageUrl = null;
-    if (req.file) {
-      const folder = "posts"; // 게시물 저장 폴더 지정
-      const fileKey = await uploadFileToS3(req.file, req.file.mimetype, folder);
-      imageUrl = `${process.env.AWS_CLOUD_FRONT_URL}/${fileKey}`;
-    }
+    let parsedIsPublic = typeof isPublic === "string" ? isPublic.toLowerCase() === "true" : !!isPublic;
+    let parsedTags = Array.isArray(tags) ? tags : [];
 
     const newPost = await createPostService({
       groupId: parseInt(groupId),
@@ -70,7 +48,7 @@ const createPost = async (req, res) => {
       title,
       content,
       postPassword,
-      imageUrl,
+      imageUrl, // 기존 로직 없이 받아온 imageUrl 사용
       tags: parsedTags,
       location,
       moment,
@@ -93,16 +71,16 @@ const createPost = async (req, res) => {
       createdAt: newPost.createdAt.toISOString(),
     });
 
-    await checkPostCount(newPost.groupId); // 게시물 수 체크
-    await checkConsecutiveDays(newPost.groupId); // 연속 일수 체크
+    await checkPostCount(newPost.groupId);
+    await checkConsecutiveDays(newPost.groupId);
     console.log("배지 조건 체크 완료");
 
-    res.status(200).json(formattedPost);
   } catch (error) {
     console.error("게시글 등록 오류:", error);
     res.status(500).json({ error: "서버 오류로 게시글을 등록할 수 없습니다." });
   }
 };
+
 
 //그룹별 게시물 조회(GET)
 const getPostsByGroup = async (req, res) => {
