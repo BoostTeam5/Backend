@@ -71,6 +71,7 @@ const createPost = async (req, res) => {
       createdAt: newPost.createdAt.toISOString(),
     });
 
+    //1,2번 배지 조건 확인
     await checkPostCount(newPost.groupId);
     await checkConsecutiveDays(newPost.groupId);
     console.log("배지 조건 체크 완료");
@@ -338,7 +339,7 @@ const likePost = async (req, res, next) => {
     // 변경된 게시글 저장
     await post.save();
 
-    // 배지 조건 확인
+    // 5번 배지 조건 확인
     await checkPostLikeCount(postId);
 
     return res.status(200).json({ message: "게시글 공감하기 성공" });

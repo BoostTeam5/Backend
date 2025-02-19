@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import "./config/batchScheduler.js"; // 배치 스케줄러
 import prisma from "./config/prismaClient.js";
 import postRoutes from "./routes/postRoute.js";
 import groupRouter from "./routes/groupRoute.js";
