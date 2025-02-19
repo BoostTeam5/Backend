@@ -9,17 +9,18 @@ const BADGE_GROUP_LIKE_COUNT_10000 = 4; // "그룹 공감 1만 개 이상 받기
 const BADGE_POST_LIKE_COUNT_10000 = 5; // "추억 공감 1만 개 이상 받기"
 
 const awardBadge = async (groupId, badgeId) => {
-  await prisma.groupBadge
-    .create({
+  try {
+    await prisma.groupBadge.create({
       data: { groupId, badgeId },
-      // 이미 존재하는 경우에는 무시하도록 설정
-    })
-    .catch((error) => {
-      if (error.code !== "P2002") {
-        throw error; // 중복 오류가 아닐 경우 오류를 던짐
-      }
     });
+    console.log(`그룹 ${groupId}이 배지 ${badgeId}를 받았습니다`);
+  } catch (error) {
+    if (error.code !== "P2002") {
+      console.error("배지 부여 중 오류 발생:", error);
+    }
+  }
 };
+
 
 const checkConsecutiveDays = async (groupId) => {
   const currentDate = new Date();
@@ -61,9 +62,14 @@ const checkPostCount = async (groupId) => {
 
 const checkGroupAge = async (groupId) => {
   const group = await prisma.groups.findUnique({
-    where: { id: groupId },
+    where: { groupId },
     select: { createdAt: true },
   });
+
+  if (!group) {
+    console.error(`그룹 ${groupId}을 찾을 수 없습니다`);
+    return;
+  }
 
   const currentDate = new Date();
   const createdAt = new Date(group.createdAt);

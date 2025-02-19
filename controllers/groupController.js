@@ -268,6 +268,7 @@ const likeGroup = async (req, res) => {
       return res.status(404).json({ message: "존재하지 않습니다" });
     }
 
+    //4번 배지 조건 확인
     await checkGroupLikeCount(groupId);
 
     res.status(200).json({ message: "그룹 공감하기 성공" });
@@ -276,6 +277,8 @@ const likeGroup = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
 
 export {
   createGroup,
