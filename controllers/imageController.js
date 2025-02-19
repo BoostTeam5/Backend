@@ -2,16 +2,16 @@ import { uploadFileToS3 } from "../services/imageService.js";
 
 export const uploadImage = async (req, res) => {
   try {
-    const { type } = req.params;
-    if (!["groups", "posts"].includes(type)) {
-      return res.status(400).json({ message: "잘못된 업로드 유형입니다." });
-    }
-
     if (!req.file) {
       return res.status(400).json({ message: "파일이 업로드되지 않았습니다." });
     }
 
-    const imageUrl = await uploadFileToS3(req.file, type);
+    const { type } = req.params; // URL 파라미터에서 type 가져오기
+    const folder = type === "posts" || type === "groups" ? type : "uploads"; // 기본 uploads 폴더
+
+    const fileKey = await uploadFileToS3(req.file, req.file.mimetype, folder);
+    const imageUrl = `${process.env.AWS_CLOUD_FRONT_URL}/${fileKey}`;
+
     res.status(200).json({ imageUrl });
 
   } catch (error) {
