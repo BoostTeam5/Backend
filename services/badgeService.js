@@ -93,12 +93,21 @@ const checkGroupLikeCount = async (groupId) => {
 };
 
 const checkPostLikeCount = async (postId) => {
+  const parsedPostId = parseInt(postId,10);
   const post = await prisma.posts.findUnique({
-    where: { id: postId },
+    where: { postId:parsedPostId },
     select: { groupId: true, likeCount: true },
   });
 
-  if (post.likeCount >= 10000) {
+  const existingBadge = await prisma.groupBadge.findFirst({
+    where: { groupId: post.groupId, badgeId: BADGE_POST_LIKE_COUNT_10000 },
+  });
+  if (existingBadge) {
+    //console.log(`이미 배지 5번을 받음`);
+    return; 
+  }
+
+  if (post.likeCount >= 12) {
     await awardBadge(post.groupId, BADGE_POST_LIKE_COUNT_10000);
   }
 };
