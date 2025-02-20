@@ -270,6 +270,7 @@ const likeGroup = async (req, res) => {
 
     //4번 배지 조건 확인
     await checkGroupLikeCount(groupId);
+    console.log(`배지4 조건 체크 완료`);
 
     res.status(200).json({ message: "그룹 공감하기 성공" });
   } catch (error) {

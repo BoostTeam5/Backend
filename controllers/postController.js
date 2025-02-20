@@ -73,8 +73,9 @@ const createPost = async (req, res) => {
 
     //1,2번 배지 조건 확인
     await checkPostCount(newPost.groupId);
+    console.log("배지1 조건 체크 완료");
     await checkConsecutiveDays(newPost.groupId);
-    console.log("배지 조건 체크 완료");
+    console.log("배지2 조건 체크 완료");
 
   } catch (error) {
     console.error("게시글 등록 오류:", error);
@@ -323,26 +324,27 @@ const likePost = async (req, res, next) => {
 
   try {
     // 데이터베이스에서 해당 게시글 찾기
+    const parsedPostId = parseInt(postId,10);
     const post = await prisma.posts.findUnique({
-      where: { id: postId },
+      where: { postId:parsedPostId },
     });
 
     if (!post) {
       throw new NotFoundError();
     }
 
-    const updatePost = await prisma.posts.update({
-      where: { id: postId },
-      data: { likecount: post.likeCount + 1 },
+    const updatedPost = await prisma.posts.update({
+      where: { postId: parsedPostId },
+      data: { likeCount: post.likeCount + 1 },
     });
 
-    // 변경된 게시글 저장
-    await post.save();
+    console.log(`게시글 ${postId} 공감 수 증가 완료`);
 
     // 5번 배지 조건 확인
-    await checkPostLikeCount(postId);
+    await checkPostLikeCount(parsedPostId);
+    console.log(`배지5 조건 확인 완료`);
 
-    return res.status(200).json({ message: "게시글 공감하기 성공" });
+    return res.status(200).json({ message: "게시글 공감하기 성공",likeCount:updatedPost.likeCount });
   } catch (err) {
     next(err);
   }
