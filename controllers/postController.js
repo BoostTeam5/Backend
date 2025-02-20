@@ -55,6 +55,11 @@ const createPost = async (req, res) => {
       isPublic: parsedIsPublic,
     });
 
+    await prisma.groups.update({
+      where: { groupId: parseInt(groupId) },
+      data: { postCount: { increment: 1 } }, // postCount 값을 1 증가
+    });
+
     res.status(201).json({
       id: newPost.postId,
       groupId: newPost.groupId,
