@@ -43,8 +43,12 @@ export async function addComment(req, res) {
 //댓글 목록 조회
 export async function getCommentList(req, res) {
     const { postId } = req.params;
-    const { page, pageSize } = req.query;
+    let { page, pageSize } = req.query;
   
+    //기본값 설정 (page=1, pageSize=10)
+    page = parseInt(page) || 1;
+    pageSize = parseInt(pageSize) || 10;
+
     //필수 파라미터 검증
     if (!page || !pageSize || isNaN(page) || isNaN(pageSize) || page < 1 || pageSize < 1) {
       return res.status(400).json({ message: "잘못된 요청입니다" });
