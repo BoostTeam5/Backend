@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
 import Group from "../models/groupModel.js";
-import { checkGroupLikeCount } from "../services/badgeService.js";
+import {
+  checkGroupLikeCount,
+  getBadgesByGroupId,
+} from "../services/badgeService.js";
 
 // 그룹 등록
 const createGroup = async (req, res) => {
@@ -108,13 +111,16 @@ const getGroupDetails = async (req, res) => {
       return res.status(404).json({ message: "그룹을 찾을 수 없습니다" });
     }
 
+    // 배지 목록 조회
+    const badges = await getBadgesByGroupId(groupId); // 배지 목록을 가져오는 함수 호출
+
     res.status(200).json({
       id: group.groupId,
       name: group.name,
       imageUrl: group.imageUrl,
       isPublic: group.isPublic,
       likeCount: group.likeCount,
-      badges: [], // 배지 목록은 추가 구현 필요
+      badges: badges || [], // 배지 목록은 추가 구현 필요
       postCount: group.postCount,
       createdAt: group.createdAt,
       introduction: group.introduction,
@@ -269,8 +275,16 @@ const likeGroup = async (req, res) => {
     }
 
     //4번 배지 조건 확인
-    await checkGroupLikeCount(groupId);
+    const badgeGranted = await checkGroupLikeCount(groupId);
     console.log(`배지4 조건 체크 완료`);
+
+    //badgeCount 증가
+    if (badgeGranted) {
+      await prisma.groups.update({
+        where: { groupId: groupId },
+        data: { badgeCount: { increment: 1 } },
+      });
+    }
 
     res.status(200).json({ message: "그룹 공감하기 성공" });
   } catch (error) {
@@ -278,8 +292,6 @@ const likeGroup = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-
 
 export {
   createGroup,

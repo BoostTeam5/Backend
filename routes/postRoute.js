@@ -2,8 +2,6 @@ import express from "express";
 import postController from "../controllers/postController.js";
 import multer from "multer";
 
-//댓글 관련 내용 추가 필요
-
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 

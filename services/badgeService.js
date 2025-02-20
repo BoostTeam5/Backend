@@ -21,7 +21,6 @@ const awardBadge = async (groupId, badgeId) => {
   }
 };
 
-
 const checkConsecutiveDays = async (groupId) => {
   const currentDate = new Date();
   const startDate = new Date(currentDate);
@@ -93,9 +92,9 @@ const checkGroupLikeCount = async (groupId) => {
 };
 
 const checkPostLikeCount = async (postId) => {
-  const parsedPostId = parseInt(postId,10);
+  const parsedPostId = parseInt(postId, 10);
   const post = await prisma.posts.findUnique({
-    where: { postId:parsedPostId },
+    where: { postId: parsedPostId },
     select: { groupId: true, likeCount: true },
   });
 
@@ -104,11 +103,32 @@ const checkPostLikeCount = async (postId) => {
   });
   if (existingBadge) {
     //console.log(`이미 배지 5번을 받음`);
-    return; 
+    return;
   }
 
   if (post.likeCount >= 12) {
     await awardBadge(post.groupId, BADGE_POST_LIKE_COUNT_10000);
+  }
+};
+
+const getBadgesByGroupId = async (groupId) => {
+  try {
+    // 해당 그룹에 연결된 배지 목록 조회
+    const groupBadges = await prisma.groupBadge.findMany({
+      where: { groupId: groupId },
+      include: {
+        badge: true, // 배지 정보도 포함
+      },
+    });
+
+    // 배지 정보만 추출
+    return groupBadges.map((gb) => ({
+      id: gb.badge.id,
+      name: gb.badge.name,
+    }));
+  } catch (error) {
+    console.error("Error fetching badges by group ID:", error);
+    throw error; // 오류를 상위 함수로 전달
   }
 };
 
@@ -118,4 +138,5 @@ export {
   checkGroupAge,
   checkGroupLikeCount,
   checkPostLikeCount,
+  getBadgesByGroupId,
 };

@@ -12,8 +12,6 @@ import {
   deletePostService,
 } from "../services/postService.js";
 import { uploadFileToS3, deleteFileFromS3 } from "../services/imageService.js";
-
-//배지, 태그관련 import 필요
 import {
   checkConsecutiveDays,
   checkPostCount,
@@ -39,15 +37,21 @@ const createPost = async (req, res) => {
   }
 
   try {
-    let parsedIsPublic = typeof isPublic === "string" ? isPublic.toLowerCase() === "true" : !!isPublic;
+    let parsedIsPublic =
+      typeof isPublic === "string"
+        ? isPublic.toLowerCase() === "true"
+        : !!isPublic;
     let parsedTags = Array.isArray(tags) ? tags : [];
+
+    // 비밀번호 해시화
+    const hashedPassword = await hashPassword(postPassword);
 
     const newPost = await createPostService({
       groupId: parseInt(groupId),
       nickname,
       title,
       content,
-      postPassword,
+      postPassword: hashedPassword, // 해시된 비밀번호 저장
       imageUrl, // 기존 로직 없이 받아온 imageUrl 사용
       tags: parsedTags,
       location,
@@ -81,13 +85,11 @@ const createPost = async (req, res) => {
     console.log("배지1 조건 체크 완료");
     await checkConsecutiveDays(newPost.groupId);
     console.log("배지2 조건 체크 완료");
-
   } catch (error) {
     console.error("게시글 등록 오류:", error);
     res.status(500).json({ error: "서버 오류로 게시글을 등록할 수 없습니다." });
   }
 };
-
 
 //그룹별 게시물 조회(GET)
 const getPostsByGroup = async (req, res) => {
@@ -299,7 +301,7 @@ const verifyPostPassword = async (req, res, next) => {
   try {
     // 데이터베이스에서 해당 게시글 찾기
     const post = await prisma.posts.findUnique({
-      where: { id: postId },
+      where: { id: parseInt(postId) },
     });
 
     if (!post) {
@@ -311,7 +313,7 @@ const verifyPostPassword = async (req, res, next) => {
     }
 
     // 비밀번호 확인
-    const isMatch = await comparePassword(password, post.password);
+    const isMatch = await comparePassword(password, post.postPassword);
     if (!isMatch) {
       throw new WrongPasswordError();
     }
@@ -329,9 +331,9 @@ const likePost = async (req, res, next) => {
 
   try {
     // 데이터베이스에서 해당 게시글 찾기
-    const parsedPostId = parseInt(postId,10);
+    const parsedPostId = parseInt(postId, 10);
     const post = await prisma.posts.findUnique({
-      where: { postId:parsedPostId },
+      where: { postId: parsedPostId },
     });
 
     if (!post) {
@@ -349,7 +351,10 @@ const likePost = async (req, res, next) => {
     await checkPostLikeCount(parsedPostId);
     console.log(`배지5 조건 확인 완료`);
 
-    return res.status(200).json({ message: "게시글 공감하기 성공",likeCount:updatedPost.likeCount });
+    return res.status(200).json({
+      message: "게시글 공감하기 성공",
+      likeCount: updatedPost.likeCount,
+    });
   } catch (err) {
     next(err);
   }

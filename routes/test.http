@@ -12,7 +12,7 @@ PUT http://localhost:5000/api/groups/1
 
 
 ### GET 요청 (1번 그룹 상세 조회)
-GET http://localhost:5000/api/groups/1
+GET http://localhost:5000/api/groups/3
 
 ### POST 요청 (권한 조회 / 해시값)
 POST http://localhost:5000/api/groups/1/verify-password
@@ -46,4 +46,4 @@ Post http://localhost:5000/api/groups/1/posts
 GET http://localhost:5000/api/groups/1/posts
 
 ###게시물 상세조회
-GET http://localhost:5000/api/5
+GET http://localhost:5000/api/posts/5
