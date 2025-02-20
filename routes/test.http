@@ -40,7 +40,6 @@ POST http://localhost:5000/api/groups/1/like
 Accept: application/json
 
 ###게시글 등록
-
 Post http://localhost:5000/api/groups/1/posts
 
 ###//게시글 목록 조회
