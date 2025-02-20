@@ -1,4 +1,6 @@
 import { createComment, checkPostExists, getCommentCount, getComments, getCommentById, updateComment, deleteComment } from "../models/commentModel.js";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
 //댓글 등록
 export async function addComment(req, res) {
@@ -11,12 +13,19 @@ export async function addComment(req, res) {
 
   try {
     //해당 postId가 존재하는지 확인
-    const postExists = await checkPostExists(postId);
+    const parsedPostId = parseInt(postId, 10);
+    const postExists = await checkPostExists(parsedPostId);
     if (!postExists) {
       return res.status(400).json({ message: "존재하지 않는 게시글입니다" });
     }
 
-    const newComment = await createComment(postId, nickname, content, password);
+    const newComment = await createComment(parsedPostId, nickname, content, password);
+
+    await prisma.posts.update({
+      where: { postId:parsedPostId },
+      data: { commentCount: { increment: 1 } }, // Prisma의 increment 기능
+    });
+    console.log(`게시글 ${parsedPostId} 댓글 개수 증가됨`);
 
     return res.status(200).json({
       id: newComment.commentId,
@@ -34,8 +43,12 @@ export async function addComment(req, res) {
 //댓글 목록 조회
 export async function getCommentList(req, res) {
     const { postId } = req.params;
-    const { page, pageSize } = req.query;
+    let { page, pageSize } = req.query;
   
+    //기본값 설정 (page=1, pageSize=10)
+    page = parseInt(page) || 1;
+    pageSize = parseInt(pageSize) || 10;
+
     //필수 파라미터 검증
     if (!page || !pageSize || isNaN(page) || isNaN(pageSize) || page < 1 || pageSize < 1) {
       return res.status(400).json({ message: "잘못된 요청입니다" });
