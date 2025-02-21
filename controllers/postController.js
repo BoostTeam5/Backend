@@ -113,13 +113,12 @@ const getPostsByGroup = async (req, res) => {
       keyword,
       isPublic: isPublic === "true", // Boolean 변환
     });
-
     const formattedResponse = {
       currentPage: postsData.currentPage || 1,
       totalPages: postsData.totalPages || 1,
       totalItemCount: postsData.totalItemCount || 0,
       data: (postsData.data || []).map((post) => ({
-        id: post.postId,
+        id: post.id,
         nickname: post.nickname,
         title: post.title,
         imageUrl: post.imageUrl,
