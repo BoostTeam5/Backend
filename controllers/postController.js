@@ -17,6 +17,7 @@ import {
   checkPostCount,
   checkPostLikeCount,
 } from "../services/badgeService.js";
+const prisma = new PrismaClient();
 
 const createPost = async (req, res) => {
   const { groupId } = req.params;
@@ -124,19 +125,19 @@ const getPostsByGroup = async (req, res) => {
         imageUrl: post.imageUrl,
         tags: post.post_tags ? post.post_tags.map((pt) => pt.tags.tagName) : [],
         location: post.location,
-        moment: 
-          post.moment && (post.moment instanceof Date)
-          ? post.moment.toISOString().split("T")[0] // ✅ `Date` 객체라면 변환
-          : post.moment
-          ? new Date(post.moment).toISOString().split("T")[0] // ✅ `String`이라면 변환
-          : null, // ✅ `null`이면 그대로 반환
+        moment:
+          post.moment && post.moment instanceof Date
+            ? post.moment.toISOString().split("T")[0] // ✅ `Date` 객체라면 변환
+            : post.moment
+            ? new Date(post.moment).toISOString().split("T")[0] // ✅ `String`이라면 변환
+            : null, // ✅ `null`이면 그대로 반환
         isPublic: Boolean(post.isPublic),
         likeCount: post.likeCount,
         commentCount: post.commentCount,
-        createdAt: post.createdAt 
-          ? (post.createdAt instanceof Date
-              ?post.createdAt.toISOString()
-              : new Date(post.createdAt).toISOString())
+        createdAt: post.createdAt
+          ? post.createdAt instanceof Date
+            ? post.createdAt.toISOString()
+            : new Date(post.createdAt).toISOString()
           : null,
       })),
     };
@@ -229,8 +230,6 @@ export const deletePost = async (req, res) => {
     res.status(500).json({ message: "게시글을 삭제할 수 없습니다." });
   }
 };
-
-const prisma = new PrismaClient();
 
 const getPostDetailsById = async (postId) => {
   try {

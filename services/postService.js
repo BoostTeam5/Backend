@@ -70,7 +70,13 @@ export const getPostsByGroupService = async ({
     whereCondition.OR = [
       { title: { contains: keyword, mode: "insensitive" } },
       { content: { contains: keyword, mode: "insensitive" } },
-      { post_tags: { some: { tags: { tagName: { contains: keyword, mode: "insensitive" } } } } },
+      {
+        post_tags: {
+          some: {
+            tags: { tagName: { contains: keyword, mode: "insensitive" } },
+          },
+        },
+      },
     ];
   }
 
@@ -78,8 +84,10 @@ export const getPostsByGroupService = async ({
     whereCondition.isPublic = isPublic;
   }
 
-  // ✅ 전체 게시글 개수 조회
-  const totalItemCount = await prisma.posts.count({ where: whereCondition });
+  // ✅ 게시글 수 조회
+  const totalItemCount = await prisma.posts.count({
+    where: whereCondition,
+  });
 
   if (totalItemCount === 0) {
     return { currentPage: page, totalPages: 1, totalItemCount: 0, data: [] };
@@ -116,7 +124,6 @@ export const getPostsByGroupService = async ({
     })),
   };
 };
-
 
 // 그룹 게시물 수정 (PUT)
 export const updatePostService = async ({ postId, updateData }) => {
