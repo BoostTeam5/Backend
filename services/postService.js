@@ -74,10 +74,6 @@ export const getPostsByGroupService = async ({
     ];
   }
 
-  if (isPublic !== undefined) {
-    whereCondition.isPublic = isPublic;
-  }
-
   // ✅ 전체 게시글 개수 조회
   const totalItemCount = await prisma.posts.count({
     where: {
