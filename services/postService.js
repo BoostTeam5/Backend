@@ -41,48 +41,82 @@ export const getPostsByGroupService = async ({
   groupId,
   page = 1,
   pageSize = 10,
-  sortBy,
-  keyword,
+  sortBy = "latest",
+  keyword = "",
   isPublic,
 }) => {
   const skip = (page - 1) * pageSize;
 
-  // 정렬 조건 설정 : latest | mostCommented | mostLiked
-  let orderBy = { createdAt: "desc" }; // 기본값: 최신순
-  if (sortBy === "mostCommented") {
-    orderBy = { commentCount: "desc" };
-  } else if (sortBy === "mostLiked") {
-    orderBy = { likeCount: "desc" };
+  // ✅ 정렬 조건 설정
+  let orderBy;
+  switch (sortBy) {
+    case "latest":
+      orderBy = { createdAt: "desc" };
+      break;
+    case "mostCommented":
+      orderBy = { commentCount: "desc" };
+      break;
+    case "mostLiked":
+      orderBy = { likeCount: "desc" };
+      break;
+    default:
+      orderBy = { createdAt: "desc" }; // 기본 정렬 (최신순)
   }
 
-  // keyword 안전 처리 (없으면 모든 게시글 조회)
-  const safeKeyword = keyword ? `%${keyword.toLowerCase()}%` : "%%";
+  // ✅ 검색 필터 설정
+  let whereCondition = { groupId }; // 기본적으로 그룹 ID 필터링
 
-  // SQL 쿼리로 대소문자 무시 검색
-  const posts = await prisma.$queryRaw`
-    SELECT p.* 
-    FROM posts p
-    LEFT JOIN post_tags pt ON p.postId = pt.postId
-    LEFT JOIN tags t ON pt.tagId = t.tagId
-    WHERE p.groupId = ${groupId}
-    AND (
-      LOWER(p.title) LIKE ${safeKeyword}
-      OR LOWER(p.content) LIKE ${safeKeyword}
-      OR LOWER(t.tagName) LIKE ${safeKeyword}
-    )
-    ORDER BY p.createdAt DESC
-    LIMIT ${pageSize} OFFSET ${skip};
-  `;
+  if (keyword) {
+    whereCondition.OR = [
+      { title: { contains: keyword, mode: "insensitive" } },
+      { content: { contains: keyword, mode: "insensitive" } },
+      { post_tags: { some: { tags: { tagName: { contains: keyword, mode: "insensitive" } } } } },
+    ];
+  }
 
-  const totalItemCount = posts.length; // 검색된 게시글 개수
+  if (isPublic !== undefined) {
+    whereCondition.isPublic = isPublic;
+  }
+
+  // ✅ 전체 게시글 개수 조회
+  const totalItemCount = await prisma.posts.count({ where: whereCondition });
+
+  if (totalItemCount === 0) {
+    return { currentPage: page, totalPages: 1, totalItemCount: 0, data: [] };
+  }
+
+  // ✅ 게시글 데이터 조회 (정렬 및 필터 적용)
+  const posts = await prisma.posts.findMany({
+    where: whereCondition,
+    orderBy,
+    skip,
+    take: pageSize,
+    include: {
+      post_tags: { include: { tags: true } }, // 태그 포함
+    },
+  });
 
   return {
     currentPage: page,
     totalPages: Math.ceil(totalItemCount / pageSize) || 1,
     totalItemCount: totalItemCount || 0,
-    data: posts || [],
+    data: posts.map((post) => ({
+      id: post.postId,
+      nickname: post.nickname,
+      title: post.title,
+      content: post.content,
+      imageUrl: post.imageUrl,
+      tags: post.post_tags.map((pt) => pt.tags.tagName),
+      location: post.location,
+      moment: post.moment ? post.moment.toISOString().split("T")[0] : null,
+      isPublic: post.isPublic,
+      likeCount: post.likeCount,
+      commentCount: post.commentCount,
+      createdAt: post.createdAt.toISOString(),
+    })),
   };
 };
+
 
 // 그룹 게시물 수정 (PUT)
 export const updatePostService = async ({ postId, updateData }) => {
