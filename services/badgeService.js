@@ -6,7 +6,7 @@ const BADGE_CONSECUTIVE_DAYS_7 = 1; // "7일 연속 추억 등록"
 const BADGE_POST_COUNT_20 = 2; // "추억 수 20개 이상 등록"
 const BADGE_GROUP_AGE_1_YEAR = 3; // "그룹 생성 후 1년 달성"
 const BADGE_GROUP_LIKE_COUNT_10000 = 4; // "그룹 공감 1만 개 이상 받기"
-const BADGE_POST_LIKE_COUNT_10000 = 5; // "추억 공감 1만 개 이상 받기"
+const BADGE_POST_LIKE_COUNT_10000 = 5; // "추억 공감 100개 이상 받기"
 
 const awardBadge = async (groupId, badgeId) => {
   try {
@@ -106,7 +106,7 @@ const checkPostLikeCount = async (postId) => {
     return;
   }
 
-  if (post.likeCount >= 12) {
+  if (post.likeCount >= 100) {
     await awardBadge(post.groupId, BADGE_POST_LIKE_COUNT_10000);
   }
 };
