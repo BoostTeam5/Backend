@@ -114,12 +114,15 @@ const getPostsByGroup = async (req, res) => {
       isPublic: isPublic === "true", // Boolean 변환
     });
 
+    // postsData에서 각 post 객체 출력 (디버깅용)
+    console.log("Posts Data:", postsData.data);
+
     const formattedResponse = {
       currentPage: postsData.currentPage || 1,
       totalPages: postsData.totalPages || 1,
       totalItemCount: postsData.totalItemCount || 0,
       data: (postsData.data || []).map((post) => ({
-        id: post.postId,
+        id: post.id,
         nickname: post.nickname,
         title: post.title,
         imageUrl: post.imageUrl,
@@ -143,6 +146,7 @@ const getPostsByGroup = async (req, res) => {
     };
 
     res.json(formattedResponse);
+    console.log("Formatted Response:", formattedResponse); // 최종 응답 내용 출력
   } catch (error) {
     console.error("게시글 조회 오류:", error);
     res.status(500).json({ error: "서버 오류로 게시글을 가져올 수 없습니다." });

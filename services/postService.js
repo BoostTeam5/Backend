@@ -68,12 +68,12 @@ export const getPostsByGroupService = async ({
 
   if (keyword) {
     whereCondition.OR = [
-      { title: { contains: keyword, mode: "insensitive" } },
-      { content: { contains: keyword, mode: "insensitive" } },
+      { title: { contains: keyword } },
+      { content: { contains: keyword } },
       {
         post_tags: {
           some: {
-            tags: { tagName: { contains: keyword, mode: "insensitive" } },
+            tags: { tagName: { contains: keyword } },
           },
         },
       },
