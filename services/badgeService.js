@@ -106,7 +106,7 @@ const checkPostLikeCount = async (postId) => {
     return;
   }
 
-  if (post.likeCount >= 12) {
+  if (post.likeCount >= 10000) {
     await awardBadge(post.groupId, BADGE_POST_LIKE_COUNT_10000);
   }
 };

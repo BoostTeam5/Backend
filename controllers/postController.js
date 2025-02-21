@@ -124,11 +124,20 @@ const getPostsByGroup = async (req, res) => {
         imageUrl: post.imageUrl,
         tags: post.post_tags ? post.post_tags.map((pt) => pt.tags.tagName) : [],
         location: post.location,
-        moment: post.moment ? post.moment.toISOString().split("T")[0] : null,
+        moment: 
+          post.moment && (post.moment instanceof Date)
+          ? post.moment.toISOString().split("T")[0] // ✅ `Date` 객체라면 변환
+          : post.moment
+          ? new Date(post.moment).toISOString().split("T")[0] // ✅ `String`이라면 변환
+          : null, // ✅ `null`이면 그대로 반환
         isPublic: Boolean(post.isPublic),
         likeCount: post.likeCount,
         commentCount: post.commentCount,
-        createdAt: post.createdAt ? post.createdAt.toISOString() : null,
+        createdAt: post.createdAt 
+          ? (post.createdAt instanceof Date
+              ?post.createdAt.toISOString()
+              : new Date(post.createdAt).toISOString())
+          : null,
       })),
     };
 
