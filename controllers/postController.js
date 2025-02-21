@@ -164,7 +164,7 @@ const updatePost = async (req, res) => {
     }
 
     const formattedResponse = {
-      id: updatedPost.postIdd,
+      id: updatedPost.postId,
       groupId: updatedPost.groupId,
       nickname: updatedPost.nickname,
       title: updatedPost.title,
