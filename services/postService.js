@@ -98,12 +98,16 @@ export const updatePostService = async ({ postId, updateData }) => {
     throw new Error("해당 게시글을 찾을 수 없습니다.");
   }
 
-  // postPassword 확인 (비밀번호가 다르면 수정 불가)
-  if (
-    existingPost.postPassword &&
-    existingPost.postPassword !== updateData.postPassword
-  ) {
-    throw new Error("비밀번호가 일치하지 않습니다.");
+  // 비밀번호 검증
+  if (existingPost.postPassword) {
+    const { postPassword } = updateData; // updateData에서 비밀번호 가져오기
+    const isMatch = await comparePassword(
+      postPassword,
+      existingPost.postPassword
+    );
+    if (!isMatch) {
+      throw new Error("비밀번호가 틀렸습니다.");
+    }
   }
 
   // 업데이트할 데이터 필터링
