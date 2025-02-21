@@ -87,10 +87,10 @@ export const getPostsByGroupService = async ({
   // ✅ 전체 게시글 개수 조회
   const totalItemCount = await prisma.posts.count({
     where: {
-      groupId: whereCondition.groupId, 
+      groupId: whereCondition.groupId,
     },
   });
-  
+
   if (totalItemCount === 0) {
     return { currentPage: page, totalPages: 1, totalItemCount: 0, data: [] };
   }

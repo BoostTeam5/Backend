@@ -8,7 +8,7 @@ async function main() {
     { id: 2, name: "추억 수 20개 이상 등록" }, //기본
     { id: 3, name: "그룹 생성 후 1년 달성" },
     { id: 4, name: "그룹 공감 1만 개 이상 받기" }, //기본
-    { id: 5, name: "추억 공감 100개 이상 받기" }, //기본
+    { id: 5, name: "추억 공감 7개 이상 받기" }, //기본
   ];
 
   for (const badge of badgesData) {

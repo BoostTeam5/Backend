@@ -45,32 +45,35 @@ model tags {
 }
 
 model groups {
-  groupId       Int       @id @default(autoincrement())
-  name          String    @db.VarChar(255)
-  imageUrl      String?   @db.VarChar(500)
-  introduction  String?   @db.Text
-  isPublic      Boolean?  @default(true)
-  groupPassword String    @db.VarChar(255)
-  badgeCount    Int?      @default(0)
-  postCount     Int?      @default(0)
-  likeCount     Int?      @default(0)
-  createdAt     DateTime? @default(now()) @db.DateTime(0)
+  groupId       Int          @id @default(autoincrement())
+  name          String       @db.VarChar(255)
+  imageUrl      String?      @db.VarChar(500)
+  introduction  String?      @db.Text
+  isPublic      Boolean?     @default(true)
+  groupPassword String       @db.VarChar(255)
+  badgeCount    Int?         @default(0)
+  postCount     Int?         @default(0)
+  likeCount     Int?         @default(0)
+  createdAt     DateTime?    @default(now()) @db.DateTime(0)
+  groupBadges   GroupBadge[]
   posts         posts[]
-  groupBadges   GroupBadge[]  // GroupBadge와의 관계 추가
 }
 
 model Badge {
-  id    Int         @id @default(autoincrement())
-  name  String
+  id          Int          @id @default(autoincrement())
+  name        String
   groupBadges GroupBadge[]
 }
 
 model GroupBadge {
   id      Int    @id @default(autoincrement())
-  groupId Int    
+  groupId Int
   badgeId Int
   badge   Badge  @relation(fields: [badgeId], references: [id])
-  group   groups @relation(fields: [groupId], references: [groupId])  // groups와의 관계 추가
+  group   groups @relation(fields: [groupId], references: [groupId])
+
+  @@index([badgeId], map: "GroupBadge_badgeId_fkey")
+  @@index([groupId], map: "GroupBadge_groupId_fkey")
 }
 
 model comments {
