@@ -47,3 +47,17 @@ GET http://localhost:5000/api/groups/1/posts
 
 ###게시물 상세조회
 GET http://localhost:5000/api/posts/5
+
+
+###수정 테스트
+####게시글 수정
+PUT http://localhost:5000/api/posts/92
+Content-Type: application/json
+
+{
+  "nickname": "수정닉네임",
+  "title" : "수정제목",
+  "content":"수정게시글",
+  "postPassword":"1234"
+
+}

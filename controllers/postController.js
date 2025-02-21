@@ -301,7 +301,7 @@ const verifyPostPassword = async (req, res, next) => {
   try {
     // 데이터베이스에서 해당 게시글 찾기
     const post = await prisma.posts.findUnique({
-      where: { id: parseInt(postId) },
+      where: { postId: parseInt(postId) },
     });
 
     if (!post) {

@@ -88,7 +88,7 @@ export const getPostsByGroupService = async ({
 export const updatePostService = async ({ postId, updateData }) => {
   // 기존 게시글 확인
   const existingPost = await prisma.posts.findUnique({
-    where: { postId: postId },
+    where: { postId: parseInt(postId) },
     include: {
       post_tags: { include: { tags: true } },
     },
@@ -101,6 +101,9 @@ export const updatePostService = async ({ postId, updateData }) => {
   // 비밀번호 검증
   if (existingPost.postPassword) {
     const { postPassword } = updateData; // updateData에서 비밀번호 가져오기
+    if (!postPassword) {
+      throw new Error("비밀번호가 필요합니다."); // 비밀번호가 없으면 오류
+    }
     const isMatch = await comparePassword(
       postPassword,
       existingPost.postPassword
@@ -141,7 +144,7 @@ export const updatePostService = async ({ postId, updateData }) => {
 
   // 게시글 업데이트
   const updatedPost = await prisma.posts.update({
-    where: { postId: postId },
+    where: { postId: parseInt(postId) },
     data: updateFields,
     include: {
       post_tags: { include: { tags: true } },
