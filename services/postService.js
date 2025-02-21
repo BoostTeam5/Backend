@@ -84,9 +84,11 @@ export const getPostsByGroupService = async ({
     whereCondition.isPublic = isPublic;
   }
 
-  // ✅ 게시글 수 조회
+  // ✅ 전체 게시글 개수 조회
   const totalItemCount = await prisma.posts.count({
-    where: whereCondition,
+    where: {
+      groupId: whereCondition.groupId, // groupId만 필터링
+    },
   });
 
   if (totalItemCount === 0) {
